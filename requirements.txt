@@ -1,0 +1,5 @@
+SQLAlchemy~=2.0.32
+fastapi~=0.112.0
+GeoAlchemy2~=0.15.2
+alembic~=1.13.2
+python-dotenv~=1.0.1

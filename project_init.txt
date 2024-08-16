@@ -1,0 +1,141 @@
+															/*APPTIVITY*/
+
+
+/*
+ * En la terminal:
+ * sudo apt install postgis postgresql-14-postgis-3
+
+ * */
+
+CREATE EXTENSION postgis;
+
+
+SELECT * FROM pg_available_extensions WHERE name = 'postgis';
+
+
+/*STRUCTURE*/
+
+CREATE TABLE city (
+    cp VARCHAR(10) PRIMARY KEY,      -- Código postal como clave primaria
+    name VARCHAR(255) NOT NULL,      -- Nombre de la ciudad
+    coordinates GEOGRAPHY(POINT, 4326) NOT NULL  -- Coordenadas usando el tipo GEOGRAPHY
+);
+
+
+CREATE TABLE place (
+    id SERIAL PRIMARY KEY,        -- Campo autoincremental
+    name VARCHAR(255) NOT NULL,  -- Nombre del lugar
+    city_cp VARCHAR(10) NOT NULL, -- Clave foránea que referencia a `cp` en la tabla `city`
+    FOREIGN KEY (city_cp) REFERENCES city(cp) -- Definición de la clave foránea
+);
+
+
+CREATE TABLE organizer (
+    id SERIAL PRIMARY KEY,          -- Campo autoincremental para la clave primaria
+    name VARCHAR(255) NOT NULL,    -- Nombre del organizador
+    city_cp VARCHAR(10) NOT NULL,  -- Clave foránea que referencia a `cp` en la tabla `city`
+    description TEXT,              -- Descripción del organizador
+    email VARCHAR(255) UNIQUE,     -- Correo electrónico, debe ser único
+    phone VARCHAR(20),             -- Teléfono
+    FOREIGN KEY (city_cp) REFERENCES city(cp) -- Definición de la clave foránea
+);
+
+
+CREATE TABLE category (
+    id SERIAL PRIMARY KEY,          -- Campo autoincremental para la clave primaria
+    name VARCHAR(255) NOT NULL     -- Nombre de la categoría, no puede ser NULL
+);
+
+
+CREATE TABLE activity (
+    id SERIAL PRIMARY KEY,               -- Campo autoincremental para la clave primaria
+    name VARCHAR(255) NOT NULL,         -- Nombre de la actividad
+    city_cp VARCHAR(10) NOT NULL,       -- Clave foránea que referencia a `cp` en la tabla `city`
+    date TIMESTAMPTZ NOT NULL,          -- Fecha y hora de la actividad (con zona horaria)
+    price DECIMAL(10, 2),               -- Precio de la actividad (hasta 10 dígitos en total, 2 decimales)
+    organizer_id INTEGER NOT NULL,      -- Clave foránea que referencia a `id` en la tabla `organizer`
+    description TEXT,                   -- Descripción de la actividad
+    category_id INTEGER NOT NULL,       -- Clave foránea que referencia a `id` en la tabla `category`
+    cancelled BOOLEAN DEFAULT FALSE,    -- Indica si la actividad ha sido cancelada
+    number_of_assistances INTEGER DEFAULT 0,  -- Número de asistentes (inicialmente 0)
+    number_of_shipments INTEGER DEFAULT 0,    -- Número de envíos (inicialmente 0)
+    number_of_discards INTEGER DEFAULT 0,     -- Número de descartes (inicialmente 0)
+    FOREIGN KEY (city_cp) REFERENCES city(cp),              -- Clave foránea que referencia a la tabla `city`
+    FOREIGN KEY (organizer_id) REFERENCES organizer(id),    -- Clave foránea que referencia a la tabla `organizer`
+    FOREIGN KEY (category_id) REFERENCES category(id)       -- Clave foránea que referencia a la tabla `categoria`
+);
+
+
+CREATE TABLE "user" (
+    id SERIAL PRIMARY KEY,                  -- Campo autoincremental para la clave primaria
+    name VARCHAR(255) NOT NULL,            -- Nombre del usuario
+    email VARCHAR(255) UNIQUE NOT NULL,    -- Correo electrónico, debe ser único y no puede ser NULL
+    password VARCHAR(255) NOT NULL,        -- Contraseña del usuario
+    city_cp VARCHAR(10),                   -- Clave foránea que referencia a `cp` en la tabla `city`
+    settings JSONB,                        -- Campo para almacenar configuraciones en formato JSON
+    FOREIGN KEY (city_cp) REFERENCES city(cp)  -- Definición de la clave foránea
+);
+
+
+
+pip install fastapi uvicorn
+
+
+pip install sqlalchemy psycopg2-binary
+
+pip install alembic
+
+├── app(directorio principal)
+│   ├── main.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── routes/
+│   │   │   ├── __init__.py
+│   │   │   ├── activities.py
+│   │   │   ├── users.py
+│   │   │   └── organizers.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── activity_service.py
+│   │   │   ├── user_service.py
+│   │   │   └── organizer_service.py
+│   │   └── repositories/
+│   │       ├── __init__.py
+│   │       ├── activity_repository.py
+│   │       ├── user_repository.py
+│   │       └── organizer_repository.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   └── security.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── models.py
+│   ├── database.py
+│   └── schemas/
+│       ├── __init__.py
+│       ├── activity_schemas.py
+│       ├── user_schemas.py
+│       └── organizer_schemas.py
+│
+├── migrations/
+│   ├── versions/
+│   └── env.py
+│
+├── alembic.ini
+├── .gitignore
+├── requirements.txt
+└── README.md
+
+CREATE EXTENSION postgis;
+
+
+SELECT * FROM pg_available_extensions WHERE name = 'postgis';
+
+alembic init migrations -> crea el alembic.ini
+alembic revision --autogenerate -m "Initial migration"
+Después de generar la migración, revisa el archivo de migración en el directorio migrations/versions para asegurarte de que refleje correctamente la estructura de tus modelos.
+
+Para aplicar la migración a la base de datos, ejecuta:
+
+alembic upgrade head
