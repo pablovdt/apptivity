@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
 
@@ -16,6 +16,15 @@ class ActivityBase(BaseModel):
     number_of_assistances: Optional[int]
     number_of_shipments: Optional[int]
     number_of_discards: Optional[int]
+
+class ActivityFilters(BaseModel):
+    name: Optional[str] = None
+    place_id: Optional[int] = None
+    date_from: Optional[datetime] = None
+    date_to: Optional[datetime] = None
+    # category_ids: Optional[List[int]] = None
+    organizer_id: Optional[int] = None
+    cancelled: Optional[bool] = None
 
 
 class ActivityCreate(ActivityBase):

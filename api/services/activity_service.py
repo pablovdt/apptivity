@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models.activity import Activity
-from schemas.activity_schema import ActivityCreate, ActivityUpdate
+from schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityFilters
 from api.repositories.activity_repo import activity_repo, ActivityRepo
 
 
@@ -29,19 +29,8 @@ class ActivityService:
             raise ValueError("La actividad no existe")
         return activity
 
-    def get_all_activities(self, db: Session, filters: dict = None) -> list[Activity]:
-        query = db.query(Activity)
-
-        if filters:
-            for key, value in filters.items():
-                if key == "name" and value:
-                    query = query.filter(Activity.name.ilike(f"%{value}%"))  # Filtro "contains" para name
-                elif key in ["cancelled"]:
-                    query = query.filter(getattr(Activity, key) == value)
-                else:
-                    query = query.filter(getattr(Activity, key) == value)
-
-        return query.all()
+    def get_all_activities(self, db: Session, filters: ActivityFilters) -> list[Activity]:
+        return self._repo.get_all_activities(db=db, filters=filters)
 
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Activity:
         activity = self.get_activity(db=db, activity_id=activity_id)

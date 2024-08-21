@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from schemas.activity_schema import ActivityOut, ActivityUpdate, ActivityCreate
+from schemas.activity_schema import ActivityOut, ActivityUpdate, ActivityCreate, ActivityFilters
 from api.services.activity_service import activity_service
 from database import get_db
 from typing import Optional, List
@@ -29,26 +29,11 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
 
 # Obtener todas las actividades (con filtros opcionales)
 @router.get("/activities/", response_model=List[ActivityOut])
-def get_all_activities(
-        db: Session = Depends(get_db),
-        name: Optional[str] = None,
-        city_cp: Optional[str] = None,
-        organizer_id: Optional[int] = None,
-        cancelled: Optional[bool] = None
-):
-    filters = {}
-
-    if name:
-        filters["name"] = name
-    if city_cp:
-        filters["city_cp"] = city_cp
-    if organizer_id:
-        filters["organizer_id"] = organizer_id
-    if cancelled is not None:
-        filters["cancelled"] = cancelled
-
-    return activity_service.get_all_activities(db=db, filters=filters)
-
+def get_all_activities(filters: ActivityFilters = Depends(), db: Session = Depends(get_db)):
+    try:
+        return activity_service.get_all_activities(db=db, filters=filters)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 # Actualizar actividad por ID
 @router.patch("/activity/{activity_id}/", response_model=ActivityOut)

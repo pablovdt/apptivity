@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models.activity import Activity
+from schemas.activity_schema import ActivityFilters
 
 
 class ActivityRepo:
@@ -8,12 +9,21 @@ class ActivityRepo:
         return db.query(Activity).filter(Activity.id == activity_id).first()
 
     @staticmethod
-    def get_all_activities(db: Session, filters: dict = None) -> list[Activity]:
+    def get_all_activities(db: Session, filters: ActivityFilters) -> list[Activity]:
         query = db.query(Activity)
 
-        if filters:
-            for key, value in filters.items():
-                query = query.filter(getattr(Activity, key) == value)
+        if filters.name:
+            query = query.filter(Activity.name.ilike(f"%{filters.name}%"))  # Filtro "contains" para name
+        if filters.date_from:
+            query = query.filter(Activity.date >= filters.date_from)
+        if filters.date_to:
+            query = query.filter(Activity.date <= filters.date_to)
+        if filters.cancelled is not None:
+            query = query.filter(Activity.cancelled == filters.cancelled)
+        if filters.place_id:
+            query = query.filter(Activity.place_id == filters.place_id)
+        if filters.organizer_id:
+            query = query.filter(Activity.organizer_id == filters.organizer_id)
 
         return query.all()
 
