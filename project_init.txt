@@ -101,16 +101,17 @@ pip install alembic
 │   │   │   └── organizer_service.py
 │   │   └── repositories/
 │   │       ├── __init__.py
-│   │       ├── activity_repository.py
-│   │       ├── user_repository.py
-│   │       └── organizer_repository.py
+│   │       ├── activity_repos.py
+│   │       ├── user_repo.py
+│   │       └── organizer_repos.py
 │   ├── core/
 │   │   ├── __init__.py
 │   │   ├── config.py
 │   │   └── security.py
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── models.py
+│   │   └── activity.py
+|   |   └── organizer.py
 │   ├── database.py
 │   └── schemas/
 │       ├── __init__.py
@@ -134,8 +135,14 @@ SELECT * FROM pg_available_extensions WHERE name = 'postgis';
 
 alembic init migrations -> crea el alembic.ini
 alembic revision --autogenerate -m "Initial migration"
-Después de generar la migración, revisa el archivo de migración en el directorio migrations/versions para asegurarte de que refleje correctamente la estructura de tus modelos.
+Después de generar la migración, revisa el archivo de migración en el directorio migrations/versions para asegurarte
+ de que refleje correctamente la estructura de tus modelos.
 
 Para aplicar la migración a la base de datos, ejecuta:
 
 alembic upgrade head
+
+pip install pydantic[email]
+
+pip install passlib[bcrypt] python-dotenv
+

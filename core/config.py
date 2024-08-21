@@ -3,7 +3,7 @@ import os
 
 class Settings:
     PROJECT_NAME: str = "apptivity"
-    PROJECT_DESCRIPTION: str = "description...."
+    PROJECT_DESCRIPTION: str = "API toi manage Apptivity"
     PROJECT_VERSION: str = "0.1.0"
 
     DATABASE_URL: str

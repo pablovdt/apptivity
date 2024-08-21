@@ -3,3 +3,6 @@ fastapi~=0.112.0
 GeoAlchemy2~=0.15.2
 alembic~=1.13.2
 python-dotenv~=1.0.1
+pydantic~=2.8.2
+passlib~=1.7.4
+bcrypt~=4.2.0

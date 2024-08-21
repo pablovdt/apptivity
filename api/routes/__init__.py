@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
-from .activity import router as activity_router
-from .category import router as category_router
-from .city import router as city_router
-from .organizer import router as organizer_router
-from .place import router as place_router
-from .user import router as user_router
+from .activity_route import router as activity_router
+from .category_route import router as category_router
+from .city_route import router as city_router
+from .organizer_route import router as organizer_router
+from .place_route import router as place_router
+from .user_route import router as user_router
 
 
 
