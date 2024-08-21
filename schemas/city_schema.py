@@ -1,15 +1,18 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class CityBase(BaseModel):
     name: str
     latitude: float
     longitude: float
 
-    class Config:
-        orm_mode = True
-
 class CityCreate(CityBase):
-    cp: str
+    pass
+
+class CityUpdate(CityBase):
+    name: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 class CityOut(CityBase):
     cp: str
