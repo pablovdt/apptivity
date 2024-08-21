@@ -22,8 +22,10 @@ class ActivityCreate(ActivityBase):
     name: str
     place_id: int
     date: datetime
-    category_id: int
+    price: float
     organizer_id: int
+    description: str
+    category_id: int
 
 
 class ActivityUpdate(ActivityBase):
