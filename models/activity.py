@@ -7,7 +7,7 @@ class Activity(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    city_cp = Column(VARCHAR(10), ForeignKey('city.cp'), nullable=False)
+    place_id = Column(Integer, ForeignKey('place.id'), nullable=False)
     date = Column(DateTime(timezone=True), nullable=False)
     price = Column(Numeric(10, 2))
     organizer_id = Column(Integer, ForeignKey('organizer.id'), nullable=False)

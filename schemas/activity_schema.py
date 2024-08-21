@@ -1,26 +1,37 @@
-from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
+from decimal import Decimal
 
 
 class ActivityBase(BaseModel):
-    name: str
-    city_cp: str
-    date: datetime
-    price: Optional[float] = None
-    organizer_id: int
-    description: Optional[str] = None
-    category_id: int
+    name: Optional[str]
+    place_id: Optional[int]
+    date: Optional[datetime]
+    price: Optional[Decimal]
+    organizer_id: Optional[int]
+    description: Optional[str]
+    category_id: Optional[int]
     cancelled: Optional[bool] = False
-    number_of_assistances: Optional[int] = 0
-    number_of_shipments: Optional[int] = 0
-    number_of_discards: Optional[int] = 0
+    number_of_assistances: Optional[int]
+    number_of_shipments: Optional[int]
+    number_of_discards: Optional[int]
 
-    class Config:
-        orm_mode = True
 
 class ActivityCreate(ActivityBase):
+    name: str
+    place_id: int
+    date: datetime
+    category_id: int
+    organizer_id: int
+
+
+class ActivityUpdate(ActivityBase):
     pass
+
 
 class ActivityOut(ActivityBase):
     id: int
+
+    class Config:
+        orm_mode = True
