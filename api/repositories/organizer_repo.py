@@ -9,4 +9,40 @@ class OrganizerRepo:
         db.refresh(organizer)
         return organizer
 
+    @staticmethod
+    def get_organizer(db: Session, organizer_id: int) -> Organizer:
+        return db.query(Organizer).filter(Organizer.id == organizer_id).first()
+
+    @staticmethod
+    def get_all_organizers(db: Session, filters: dict = None) -> list[Organizer]:
+        query = db.query(Organizer)
+        if filters:
+            for key, value in filters.items():
+                if key in ["name"]:
+                    query = query.filter(getattr(Organizer, key).ilike(f"%{value}%"))
+                else:
+                    query = query.filter(getattr(Organizer, key) == value)
+        return query.all()
+
+    @staticmethod
+    def update_organizer(db: Session, organizer_id: int, organizer_data: dict) -> Organizer:
+        organizer = db.query(Organizer).filter(Organizer.id == organizer_id).first()
+        if organizer:
+            for key, value in organizer_data.items():
+                setattr(organizer, key, value)
+            db.commit()
+            db.refresh(organizer)
+            return organizer
+        else:
+            return None
+
+    @staticmethod
+    def delete_organizer(db: Session, organizer_id: int):
+        organizer = db.query(Organizer).filter(Organizer.id == organizer_id).first()
+        if organizer:
+            db.delete(organizer)
+            db.commit()
+        else:
+            raise ValueError("Organizer not found")
+
 organizer_repo: OrganizerRepo = OrganizerRepo()
