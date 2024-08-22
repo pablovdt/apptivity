@@ -25,6 +25,7 @@ class ActivityFilters(BaseModel):
     # category_ids: Optional[List[int]] = None
     organizer_id: Optional[int] = None
     cancelled: Optional[bool] = None
+    is_date_order_asc: bool = True
 
 
 class ActivityCreate(ActivityBase):

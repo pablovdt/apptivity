@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from models.organizer import Organizer
 
+
 class OrganizerRepo:
     @staticmethod
     def save_organizer(db: Session, organizer: Organizer) -> Organizer:
@@ -44,5 +45,18 @@ class OrganizerRepo:
             db.commit()
         else:
             raise ValueError("Organizer not found")
+
+    @staticmethod
+    def get_password_by_email(db: Session, email: str) -> str:
+        organizer = db.query(Organizer).filter(Organizer.email == email).first()
+        if organizer:
+            return organizer.password
+        else:
+            return None
+
+    @staticmethod
+    def get_organizer_by_email(db: Session, email: str) -> Organizer:
+        return db.query(Organizer).filter(Organizer.email == email).first()
+
 
 organizer_repo: OrganizerRepo = OrganizerRepo()

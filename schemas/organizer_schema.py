@@ -1,15 +1,19 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class OrganizerBase(BaseModel):
     name: str
     city_cp: str
     description: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    password: str
+
 
 class OrganizerCreate(OrganizerBase):
-    pass
+    password: str
+
 
 class OrganizerUpdate(BaseModel):
     name: Optional[str] = None
@@ -17,6 +21,8 @@ class OrganizerUpdate(BaseModel):
     description: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    password: str  #
+
 
 class OrganizerOut(OrganizerBase):
     id: int

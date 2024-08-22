@@ -25,6 +25,11 @@ class ActivityRepo:
         if filters.organizer_id:
             query = query.filter(Activity.organizer_id == filters.organizer_id)
 
+        if filters.is_date_order_asc:
+            query = query.order_by(Activity.date.asc())
+        else:
+            query = query.order_by(Activity.date.desc())
+
         return query.all()
 
     @staticmethod

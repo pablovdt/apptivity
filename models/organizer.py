@@ -11,3 +11,4 @@ class Organizer(Base):
     description = Column(Text)
     email = Column(String(255), unique=True)
     phone = Column(String(20))
+    password = Column(String(255), nullable=False)

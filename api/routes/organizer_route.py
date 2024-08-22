@@ -38,6 +38,7 @@ def get_all_organizers(
 @router.patch("/organizer/{organizer_id}/", response_model=OrganizerOut)
 def update_organizer(organizer_id: int, organizer_update: OrganizerUpdate, db: Session = Depends(get_db)):
     try:
+        # Añadido para permitir la actualización del campo password
         return organizer_service.update_organizer(db=db, organizer_id=organizer_id, organizer_update=organizer_update)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -48,3 +49,17 @@ def delete_organizer(organizer_id: int, db: Session = Depends(get_db)):
         organizer_service.delete_organizer(db=db, organizer_id=organizer_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/organizer/password_by_email/{email}", response_model=str)
+def get_password_by_email(email: str, db: Session = Depends(get_db)):
+    try:
+        return organizer_service.get_password_by_email(db=db, email=email)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/organizer_by_email/{email}", response_model=OrganizerOut)
+def get_organizer_by_email(email: str, db: Session = Depends(get_db)):
+    try:
+        return organizer_service.get_organizer_by_email(db=db, email=email)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
