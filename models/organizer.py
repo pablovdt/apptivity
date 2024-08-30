@@ -12,3 +12,4 @@ class Organizer(Base):
     email = Column(String(255), unique=True)
     phone = Column(String(20))
     password = Column(String(255), nullable=False)
+    image_path = Column(String(255))

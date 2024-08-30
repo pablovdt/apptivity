@@ -9,3 +9,4 @@ class City(Base):
     name = Column(String(255), nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
+    location_url = Column(VARCHAR(255))

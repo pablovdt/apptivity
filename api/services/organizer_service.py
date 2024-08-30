@@ -4,12 +4,12 @@ from models import Activity
 from models.organizer import Organizer
 from schemas.organizer_schema import OrganizerCreate, OrganizerUpdate
 from api.repositories.organizer_repo import organizer_repo, OrganizerRepo
-from api.repositories.activity_repo import ActivityRepo
+from api.repositories.activity_repo import ActivityRepo, activity_repo
 
 
 class OrganizerService:
     _repo: OrganizerRepo = organizer_repo
-    _activity_repo = ActivityRepo()
+    _activity_repo: ActivityRepo = activity_repo
 
     def create_organizer(self, db: Session, organizer_create: OrganizerCreate) -> Organizer:
         organizer = Organizer(

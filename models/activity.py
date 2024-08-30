@@ -17,3 +17,4 @@ class Activity(Base):
     number_of_assistances = Column(Integer, default=0)
     number_of_shipments = Column(Integer, default=0)
     number_of_discards = Column(Integer, default=0)
+    image_path = Column(String(255))
