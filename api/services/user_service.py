@@ -40,11 +40,6 @@ class UserService:
             raise ValueError("User not found")
 
     def delete_user(self, db: Session, user_id: int):
-        # Check if the user has any associated activities
-        if db.query(Activity).filter(Activity.user_id == user_id).first():
-            raise ValueError("Cannot delete user because it has associated activities")
-
-        # If no associated activities, proceed to delete the user
         self._repo.delete_user(db=db, user_id=user_id)
 
 

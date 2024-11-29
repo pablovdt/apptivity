@@ -44,7 +44,7 @@ class CityRepo:
     @staticmethod
     def delete_city(db: Session, city_cp: str):
         # Comprobar si hay lugares asociados a la ciudad
-        if db.query(Activity).filter(Activity.place_id.in_(db.query(Place.id).filter(Place.city_cp == city_cp))).first():
+        if db.query(Activity).filter(Activity.place_id.in_(db.query(Place.id).filter(Place.city_id == city_cp))).first():
             raise ValueError("No se puede eliminar la ciudad porque tiene actividades asociadas a lugares en esta ciudad")
 
         city = db.query(City).filter(City.cp == city_cp).first()

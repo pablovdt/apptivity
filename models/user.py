@@ -1,9 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.dialects.postgresql import VARCHAR, JSONB
-from database import Base
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
-from models.user_category import user_category
-
+from database import Base
 
 class User(Base):
     __tablename__ = 'user'
@@ -12,7 +10,8 @@ class User(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    city_cp = Column(VARCHAR(10), ForeignKey('city.cp'))
+    city_id = Column(Integer, ForeignKey('city.id'))
     settings = Column(JSONB)
-    categories = relationship('Category', secondary=user_category, back_populates='users')
     notification_distance = Column(Integer, nullable=True)
+
+    categories = relationship('Category', secondary='user_category', back_populates='users')

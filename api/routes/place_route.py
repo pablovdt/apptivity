@@ -25,13 +25,13 @@ def get_place(place_id: int, db: Session = Depends(get_db)):
 def get_all_places(
     db: Session = Depends(get_db),
     name: Optional[str] = None,
-    city_cp: Optional[str] = None
+    city_id: Optional[str] = None
 ):
     filters = {}
     if name:
         filters["name"] = name
-    if city_cp:
-        filters["city_cp"] = city_cp
+    if city_id:
+        filters["city_id"] = city_id
 
     return place_service.get_all_places(db=db, filters=filters)
 

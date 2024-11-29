@@ -6,6 +6,7 @@ class CityBase(BaseModel):
     latitude: float
     longitude: float
     location_url: Optional[str] = None
+    cp: str
 
 class CityCreate(CityBase):
     pass
@@ -15,9 +16,10 @@ class CityUpdate(CityBase):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     location_url: Optional[str] = None
-
+    cp: Optional[str] = None
 
 class CityOut(CityBase):
+    id: int
     cp: str
 
     class Config:

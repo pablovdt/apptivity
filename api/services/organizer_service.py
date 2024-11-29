@@ -14,11 +14,12 @@ class OrganizerService:
     def create_organizer(self, db: Session, organizer_create: OrganizerCreate) -> Organizer:
         organizer = Organizer(
             name=organizer_create.name,
-            city_cp=organizer_create.city_cp,
+            city_id=organizer_create.city_id,
             description=organizer_create.description,
             email=organizer_create.email,
             phone=organizer_create.phone,
-            password=organizer_create.password
+            password=organizer_create.password,
+            image_path=organizer_create.image_path
         )
         return self._repo.save_organizer(db=db, organizer=organizer)
 

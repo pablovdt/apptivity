@@ -4,7 +4,7 @@ from typing import Optional
 
 class OrganizerBase(BaseModel):
     name: str
-    city_cp: str
+    city_id: int
     description: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
@@ -18,7 +18,7 @@ class OrganizerCreate(OrganizerBase):
 
 class OrganizerUpdate(BaseModel):
     name: Optional[str] = None
-    city_cp: Optional[str] = None
+    city_id: Optional[int] = None
     description: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None

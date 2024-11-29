@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
 from models.activity import Activity
+from sqlalchemy import extract, func
+from sqlalchemy.orm import Session
+from collections import namedtuple
 from schemas.activity_schema import ActivityFilters
+
+ActivityMonth = namedtuple("ActivityMonth", ["month", "activity_count"])
 
 
 class ActivityRepo:
@@ -31,6 +36,25 @@ class ActivityRepo:
             query = query.order_by(Activity.date.desc())
 
         return query.all()
+
+    @staticmethod
+    def get_activities_by_month(db: Session, organizer_id: int, year: int):
+
+        query = db.query(
+            extract('month', Activity.date).label('month'),
+            func.count(Activity.id).label('activity_count')
+        ).filter(
+            Activity.organizer_id == organizer_id,
+            extract('year', Activity.date) == year
+        ).group_by(
+            extract('month', Activity.date)
+        ).order_by(
+            extract('month', Activity.date)
+        )
+
+        result = query.all()
+
+        return [ActivityMonth(month=month, activity_count=activity_count) for month, activity_count in result]
 
     @staticmethod
     def save_activity(db: Session, activity: Activity) -> Activity:

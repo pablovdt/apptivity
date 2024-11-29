@@ -11,6 +11,7 @@ class ActivityBase(BaseModel):
     price: Optional[Decimal]
     organizer_id: Optional[int]
     description: Optional[str]
+    image_path:  Optional[str]
     category_id: Optional[int]
     cancelled: Optional[bool] = False
     number_of_assistances: Optional[int]

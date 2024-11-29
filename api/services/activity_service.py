@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from models.activity import Activity
 from schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityFilters
 from api.repositories.activity_repo import activity_repo, ActivityRepo
+from typing import Dict
 
 
 class ActivityService:
@@ -15,6 +16,7 @@ class ActivityService:
             price=activity_create.price,
             organizer_id=activity_create.organizer_id,
             description=activity_create.description,
+            image_path=activity_create.image_path if activity_create.image_path else "images/logotipo_apptivity.png" ,
             category_id=activity_create.category_id,
             cancelled=activity_create.cancelled,
             number_of_assistances=activity_create.number_of_assistances,
@@ -31,6 +33,26 @@ class ActivityService:
 
     def get_all_activities(self, db: Session, filters: ActivityFilters) -> list[Activity]:
         return self._repo.get_all_activities(db=db, filters=filters)
+
+    def get_activities_by_month(self, db: Session, organizer_id: int, year: int) -> Dict[str, int]:
+
+        activities_by_month = self._repo.get_activities_by_month(db, organizer_id, year)
+
+        months = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ]
+
+        result = {month: 0 for month in months}
+
+        for activity in activities_by_month:
+            month_number = int(activity.month)
+            if 1 <= month_number <= 12:
+                month_name = months[month_number - 1]
+                result[month_name] += activity.activity_count
+
+        return result
+
 
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Activity:
         activity = self.get_activity(db=db, activity_id=activity_id)

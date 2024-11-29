@@ -8,4 +8,4 @@ class Place(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     location_url = Column(VARCHAR(255))
-    city_cp = Column(VARCHAR(10), ForeignKey('city.cp'), nullable=False)
+    city_id = Column(Integer, ForeignKey('city.id'), nullable=False)

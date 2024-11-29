@@ -4,3 +4,4 @@ from models.organizer import Organizer
 from models.category import Category
 from models.activity import Activity
 from models.user import User
+from models.user_category import user_category

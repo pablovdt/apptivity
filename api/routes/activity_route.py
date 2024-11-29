@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from schemas.activity_schema import ActivityOut, ActivityUpdate, ActivityCreate, ActivityFilters
 from api.services.activity_service import activity_service
 from database import get_db
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 router = APIRouter()
 
@@ -32,6 +32,14 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
 def get_all_activities(filters: ActivityFilters = Depends(), db: Session = Depends(get_db)):
     try:
         return activity_service.get_all_activities(db=db, filters=filters)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/activities_by_month/", response_model=Dict[str, int])
+def get_activities_by_month(organizer_id: int, year: int, db: Session = Depends(get_db)):
+    try:
+        activities_by_month = activity_service.get_activities_by_month(db=db, organizer_id=organizer_id, year=year)
+        return activities_by_month
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

@@ -7,7 +7,7 @@ class Organizer(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    city_cp = Column(VARCHAR(10), ForeignKey('city.cp'), nullable=False)
+    city_id = Column(Integer, ForeignKey('city.id'), nullable=False)
     description = Column(Text)
     email = Column(String(255), unique=True)
     phone = Column(String(20))
