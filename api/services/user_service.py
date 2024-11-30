@@ -20,16 +20,37 @@ class UserService:
             notification_distance=user_create.notification_distance,
             settings=user_create.settings
         )
-
+        category_ids = []
         if user_create.category_ids:
             categories = []
+
             for category_id in user_create.category_ids:
                 category = category_service.get_category(db=db, category_id=category_id)
                 categories.append(category)
+                category_ids.append(category.id)
 
             user.categories = categories
 
-        return self._repo.save_user(db=db, user=user)
+        user = self._repo.save_user(db=db, user=user)
+
+        if category_ids:
+
+            activities = (
+                db.query(Activity)
+                .filter(
+                    Activity.category_id.in_(category_ids),
+                    Activity.date >= datetime.utcnow()
+                )
+                .all()
+            )
+
+            for activity in activities:
+                user.activities.append(activity)
+
+            db.commit()
+            db.refresh(user)
+
+        return user
 
     def get_user(self, db: Session, user_id: int) -> User:
         user = self._repo.get_user(db=db, user_id=user_id)
@@ -42,42 +63,78 @@ class UserService:
         return self._repo.get_all_users(db=db, filters=filters)
 
     def update_user(self, db: Session, user_id: int, user_update: UserUpdate) -> User:
-
-        existing_user = self._repo.get_user(db=db, user_id=user_id)
-
-        if not existing_user:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
             raise ValueError("User not found")
 
-        current_category_ids = {category.id for category in existing_user.categories}
+        if user_update.name is not None:
+            user.name = user_update.name
+        if user_update.email is not None:
+            user.email = user_update.email
+        if user_update.password is not None:
+            user.password = user_update.password
+        if user_update.city_id is not None:
+            user.city_id = user_update.city_id
+        if user_update.notification_distance is not None:
+            user.notification_distance = user_update.notification_distance
+        if user_update.settings is not None:
+            user.settings = user_update.settings
 
-        user_data = user_update.dict(exclude_unset=True)
-        updated_categories = set(user_data.get("category_ids", []))
+        if user_update.categories is not None:
+            user.categories.clear()
 
-        updated_user = self._repo.update_user(db=db, user_id=user_id, user_data=user_data)
+            categories = []
+            category_ids = []
+            for category_id in user_update.categories:
+                category = category_service.get_category(db=db, category_id=category_id)
+                categories.append(category)
+                category_ids.append(category.id)
 
-        new_category_ids = updated_categories - current_category_ids
-
-        if new_category_ids:
+            user.categories = categories
 
             activities = (
                 db.query(Activity)
                 .filter(
-                    Activity.category_id.in_(new_category_ids),
+                    Activity.category_id.in_(category_ids),
                     Activity.date >= datetime.utcnow()
                 )
                 .all()
             )
 
+            user.activities.clear()
+
             for activity in activities:
-                existing_user.activities.append(activity)
+                user.activities.append(activity)
 
-            db.commit()
-            db.refresh(existing_user)
+        db.commit()
+        db.refresh(user)
 
-        return updated_user
+        return user
 
     def delete_user(self, db: Session, user_id: int):
         self._repo.delete_user(db=db, user_id=user_id)
 
+
+    def get_password_by_email(self, db: Session, email: str) -> str:
+        password = self._repo.get_password_by_email(db=db, email=email)
+        if password:
+            return password
+        else:
+            raise ValueError("No se encuentra un organizador con este email")
+
+    def get_user_by_email(self, db: Session, email: str) -> User:
+        user = self._repo.get_user_by_email(db=db, email=email)
+        if user:
+            return user
+        else:
+            raise ValueError("No se encuentra un organizador cone este email")
+
+    def get_user_activities(self, db: Session, user_id: int) -> list[Activity]:
+
+        user = self._repo.get_user(db=db, user_id=user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        return user.activities
 
 user_service: UserService = UserService()

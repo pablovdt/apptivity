@@ -20,13 +20,13 @@ class UserCreate(UserBase):
         orm_mode = True
 
 class UserUpdate(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    city_id: Optional[int]
-    settings: Optional[Any]
-    password: Optional[str]
-    notification_distance: Optional[int]
-    category_ids: Optional[List[int]] = []
+    name: str = None
+    email: str = None
+    city_id: int = None
+    settings: Any = None
+    password: str = None
+    notification_distance: int = None
+    categories: List[int] = []
 
 class UserOut(UserBase):
     id: int

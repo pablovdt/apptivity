@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from schemas.activity_schema import ActivityOut
 from schemas.user_schema import UserCreate, UserUpdate, UserOut
 from api.services.user_service import user_service
 from database import get_db
@@ -37,7 +39,6 @@ def get_all_users(
     if category_id:
         filters["categories"] = [category_id]  # Filtrar por lista de categorías
 
-    # Obtener usuarios según los filtros
     return user_service.get_all_users(db=db, filters=filters)
 
 @router.patch("/user/{user_id}/", response_model=UserOut)
@@ -47,9 +48,33 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
+
 @router.delete("/user/{user_id}/", status_code=204)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     try:
         user_service.delete_user(db=db, user_id=user_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/user/password_by_email/{email}", response_model=str)
+def get_password_by_email(email: str, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_password_by_email(db=db, email=email)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/user_by_email/{email}", response_model=UserOut)
+def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_user_by_email(db=db, email=email)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/{user_id}/activities", response_model=List[ActivityOut])
+def get_user_activities(user_id: str, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_user_activities(db=db, user_id=user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
