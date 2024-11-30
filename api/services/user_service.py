@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from datetime import datetime
 from models import Activity
 from models.user import User
 from schemas.user_schema import UserCreate, UserUpdate
@@ -24,7 +24,6 @@ class UserService:
         if user_create.category_ids:
             categories = []
             for category_id in user_create.category_ids:
-
                 category = category_service.get_category(db=db, category_id=category_id)
                 categories.append(category)
 
@@ -43,12 +42,39 @@ class UserService:
         return self._repo.get_all_users(db=db, filters=filters)
 
     def update_user(self, db: Session, user_id: int, user_update: UserUpdate) -> User:
-        user_data = user_update.dict(exclude_unset=True)
-        updated_user = self._repo.update_user(db=db, user_id=user_id, user_data=user_data)
-        if updated_user:
-            return updated_user
-        else:
+
+        existing_user = self._repo.get_user(db=db, user_id=user_id)
+
+        if not existing_user:
             raise ValueError("User not found")
+
+        current_category_ids = {category.id for category in existing_user.categories}
+
+        user_data = user_update.dict(exclude_unset=True)
+        updated_categories = set(user_data.get("category_ids", []))
+
+        updated_user = self._repo.update_user(db=db, user_id=user_id, user_data=user_data)
+
+        new_category_ids = updated_categories - current_category_ids
+
+        if new_category_ids:
+
+            activities = (
+                db.query(Activity)
+                .filter(
+                    Activity.category_id.in_(new_category_ids),
+                    Activity.date >= datetime.utcnow()
+                )
+                .all()
+            )
+
+            for activity in activities:
+                existing_user.activities.append(activity)
+
+            db.commit()
+            db.refresh(existing_user)
+
+        return updated_user
 
     def delete_user(self, db: Session, user_id: int):
         self._repo.delete_user(db=db, user_id=user_id)

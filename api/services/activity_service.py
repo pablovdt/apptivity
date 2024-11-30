@@ -2,11 +2,13 @@ from sqlalchemy.orm import Session
 from models.activity import Activity
 from schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityFilters
 from api.repositories.activity_repo import activity_repo, ActivityRepo
+from api.services.user_service import user_service
 from typing import Dict
 
 
 class ActivityService:
     _repo: ActivityRepo = activity_repo
+    _user_service = user_service
 
     def create_activity(self, db: Session, activity_create: ActivityCreate) -> Activity:
         activity = Activity(
@@ -23,6 +25,11 @@ class ActivityService:
             number_of_shipments=activity_create.number_of_shipments,
             number_of_discards=activity_create.number_of_discards
         )
+
+        users = self._user_service.get_all_users(db=db, filters={"categories": [activity_create.category_id]})
+
+        activity.users.extend(users)
+
         return self._repo.save_activity(db=db, activity=activity)
 
     def get_activity(self, db: Session, activity_id: int) -> Activity:

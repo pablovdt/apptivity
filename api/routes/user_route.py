@@ -25,14 +25,19 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 def get_all_users(
     db: Session = Depends(get_db),
     name: Optional[str] = None,
-    email: Optional[str] = None
+    email: Optional[str] = None,
+    category_id: Optional[int] = None
 ):
+    # Construcción de filtros
     filters = {}
     if name:
         filters["name"] = name
     if email:
         filters["email"] = email
+    if category_id:
+        filters["categories"] = [category_id]  # Filtrar por lista de categorías
 
+    # Obtener usuarios según los filtros
     return user_service.get_all_users(db=db, filters=filters)
 
 @router.patch("/user/{user_id}/", response_model=UserOut)

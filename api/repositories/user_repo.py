@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from models import Category
 from models.user import User
 from typing import Optional
 
@@ -21,10 +23,11 @@ class UserRepo:
             for key, value in filters.items():
                 if key in ["name", "email"]:
                     query = query.filter(getattr(User, key).ilike(f"%{value}%"))
+                elif key == "categories":  # Filtrar por categorías
+                    query = query.filter(User.categories.any(Category.id.in_(value)))
                 else:
                     query = query.filter(getattr(User, key) == value)
         return query.all()
-
     @staticmethod
     def update_user(db: Session, user_id: int, user_data: dict) -> Optional[User]:
         user = db.query(User).filter(User.id == user_id).first()
