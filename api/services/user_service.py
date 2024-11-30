@@ -4,21 +4,32 @@ from models import Activity
 from models.user import User
 from schemas.user_schema import UserCreate, UserUpdate
 from api.repositories.user_repo import user_repo, UserRepo
-from api.repositories.activity_repo import ActivityRepo
+from api.services.category_service import category_service
 
 
 class UserService:
     _repo: UserRepo = user_repo
-    _activity_repo = ActivityRepo()
+    _category_service = category_service
 
     def create_user(self, db: Session, user_create: UserCreate) -> User:
         user = User(
             name=user_create.name,
             email=user_create.email,
-            password=user_create.password,  # Asegúrate de hashear la contraseña antes de guardarla
-            city_cp=user_create.city_cp,
+            password=user_create.password,
+            city_id=user_create.city_id,
+            notification_distance=user_create.notification_distance,
             settings=user_create.settings
         )
+
+        if user_create.category_ids:
+            categories = []
+            for category_id in user_create.category_ids:
+
+                category = category_service.get_category(db=db, category_id=category_id)
+                categories.append(category)
+
+            user.categories = categories
+
         return self._repo.save_user(db=db, user=user)
 
     def get_user(self, db: Session, user_id: int) -> User:

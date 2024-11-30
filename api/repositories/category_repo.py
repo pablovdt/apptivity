@@ -52,3 +52,5 @@ class CategoryRepo:
             db.commit()
         else:
             raise ValueError("Categoría no encontrada")
+
+category_repo: CategoryRepo = CategoryRepo()

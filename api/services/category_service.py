@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+
 from models.category import Category
-from schemas.category_schema import CategoryCreate, CategoryUpdate
+from schemas.category_schema import CategoryCreate, CategoryUpdate, CategoryOut
 from api.repositories.category_repo import CategoryRepo
 
 class CategoryService:
@@ -28,3 +29,6 @@ class CategoryService:
 
     def delete_category(self, db: Session, category_id: int):
         self._repo.delete_category(db=db, category_id=category_id)
+
+
+category_service: CategoryService = CategoryService()

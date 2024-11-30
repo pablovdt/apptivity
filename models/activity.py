@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, DateTime, Numeric
-from sqlalchemy.dialects.postgresql import VARCHAR
+from sqlalchemy.orm import relationship
 from database import Base
+# necessary
+from models.user_activity import user_activity
 
 class Activity(Base):
     __tablename__ = 'activity'
@@ -18,3 +20,5 @@ class Activity(Base):
     number_of_shipments = Column(Integer, default=0)
     number_of_discards = Column(Integer, default=0)
     image_path = Column(String(255))
+
+    users = relationship('User', secondary='user_activity', back_populates='activities')

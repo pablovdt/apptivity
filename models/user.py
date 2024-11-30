@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from database import Base
+# necessary
+from models.user_activity import user_activity
 
 class User(Base):
     __tablename__ = 'user'
@@ -15,3 +17,5 @@ class User(Base):
     notification_distance = Column(Integer, nullable=True)
 
     categories = relationship('Category', secondary='user_category', back_populates='users')
+
+    activities = relationship('Activity', secondary='user_activity', back_populates='users')
