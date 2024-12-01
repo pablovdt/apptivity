@@ -19,7 +19,14 @@ def create_city(city_create: CityCreate, db: Session = Depends(get_db)):
 @router.get("/city/{city_cp}/", response_model=CityOut)
 def get_city(city_cp: str, db: Session = Depends(get_db)):
     try:
-        return city_service.get_city(db=db, city_cp=city_cp)
+        return city_service.get_city_by_cp(db=db, city_cp=city_cp)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/city/id/{city_id}/", response_model=CityOut)
+def get_city(city_id: int, db: Session = Depends(get_db)):
+    try:
+        return city_service.get_city_by_id(db=db, city_id=city_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

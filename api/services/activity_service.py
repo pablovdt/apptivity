@@ -4,7 +4,8 @@ from schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityFilt
 from api.repositories.activity_repo import activity_repo, ActivityRepo
 from api.services.user_service import user_service
 from typing import Dict
-
+from datetime import datetime
+from models.user_activity import user_activity
 
 class ActivityService:
     _repo: ActivityRepo = activity_repo
@@ -26,11 +27,25 @@ class ActivityService:
             number_of_discards=activity_create.number_of_discards
         )
 
+        activity_saved = self._repo.save_activity(db=db, activity=activity)
+
         users = self._user_service.get_all_users(db=db, filters={"categories": [activity_create.category_id]})
 
-        activity.users.extend(users)
+        for user in users:
+            db.execute(
+                user_activity.insert().values(
+                    user_id=user.id,
+                    activity_id=activity.id,
+                    assistance=None,
+                    inserted=datetime.utcnow(),
+                    updated=datetime.utcnow()
+                )
+            )
 
-        return self._repo.save_activity(db=db, activity=activity)
+        db.commit()
+        db.refresh(activity)
+
+        return activity_saved
 
     def get_activity(self, db: Session, activity_id: int) -> Activity:
         activity = self._repo.get_activity_by_id(db=db, activity_id=activity_id)

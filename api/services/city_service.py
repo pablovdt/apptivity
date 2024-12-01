@@ -15,8 +15,14 @@ class CityService:
         )
         return self._repo.save_city(db=db, city=city)
 
-    def get_city(self, db: Session, city_cp: str) -> City:
-        city = self._repo.get_city_by_id(db=db, city_cp=city_cp)
+    def get_city_by_cp(self, db: Session, city_cp: str) -> City:
+        city = self._repo.get_city_by_cp(db=db, city_cp=city_cp)
+        if not city:
+            raise ValueError("Ciudad no encontrada")
+        return city
+
+    def get_city_by_id(self, db: Session, city_id: int) -> City:
+        city = self._repo.get_city_by_id(db=db, city_id=city_id)
         if not city:
             raise ValueError("Ciudad no encontrada")
         return city

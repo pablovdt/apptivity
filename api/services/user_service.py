@@ -5,8 +5,8 @@ from models.user import User
 from schemas.user_schema import UserCreate, UserUpdate
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
-
-
+from models.user_activity import user_activity
+from models.user_activity import user_activity
 class UserService:
     _repo: UserRepo = user_repo
     _category_service = category_service
@@ -45,7 +45,15 @@ class UserService:
             )
 
             for activity in activities:
-                user.activities.append(activity)
+                db.execute(
+                    user_activity.insert().values(
+                        user_id=user.id,
+                        activity_id=activity.id,
+                        assistance=None,
+                        inserted=datetime.utcnow(),
+                        updated=datetime.utcnow()
+                    )
+                )
 
             db.commit()
             db.refresh(user)
@@ -102,9 +110,19 @@ class UserService:
             )
 
             user.activities.clear()
+            db.commit()
+            db.refresh(user)
 
             for activity in activities:
-                user.activities.append(activity)
+                db.execute(
+                    user_activity.insert().values(
+                        user_id=user.id,
+                        activity_id=activity.id,
+                        assistance=None,
+                        inserted=datetime.utcnow(),
+                        updated=datetime.utcnow()
+                    )
+                )
 
         db.commit()
         db.refresh(user)
@@ -134,7 +152,7 @@ class UserService:
         user = self._repo.get_user(db=db, user_id=user_id)
         if not user:
             raise ValueError("User not found")
-
+        # todo traer todas menos las assistance = False
         return user.activities
 
 user_service: UserService = UserService()

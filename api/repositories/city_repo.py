@@ -14,8 +14,12 @@ class CityRepo:
         return city
 
     @staticmethod
-    def get_city_by_id(db: Session, city_cp: str) -> City:
+    def get_city_by_cp(db: Session, city_cp: str) -> City:
         return db.query(City).filter(City.cp == city_cp).first()
+
+    @staticmethod
+    def get_city_by_id(db: Session, city_id: int) -> City:
+        return db.query(City).filter(City.id == city_id).first()
 
     @staticmethod
     def get_all_cities(db: Session, filters: dict = None) -> list[City]:
