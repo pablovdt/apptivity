@@ -5,7 +5,7 @@ from models.user import User
 from schemas.user_schema import UserCreate, UserUpdate
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
-from models.user_activity import user_activity
+from sqlalchemy import update
 from models.user_activity import user_activity
 class UserService:
     _repo: UserRepo = user_repo
@@ -71,7 +71,9 @@ class UserService:
         return self._repo.get_all_users(db=db, filters=filters)
 
     def update_user(self, db: Session, user_id: int, user_update: UserUpdate) -> User:
+        # todo, cambiar por         user = self._repo.get_user(db=db, user_id=user_id) ?????
         user = db.query(User).filter(User.id == user_id).first()
+
         if not user:
             raise ValueError("User not found")
 
@@ -153,6 +155,27 @@ class UserService:
         if not user:
             raise ValueError("User not found")
         # todo traer todas menos las assistance = False
+
         return user.activities
+
+    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance: bool):
+        user = self._repo.get_user(db=db, user_id=user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        for activity in user.activities:
+            if activity.id == activity_id:
+                db.execute(
+                    update(user_activity)
+                    .where(
+                        user_activity.c.user_id == user_id,
+                        user_activity.c.activity_id == activity_id
+                    )
+                    .values(assistance=assistance, updated=datetime.utcnow())
+                )
+                db.commit()
+                return {"assistance": assistance}
+
+            raise ValueError("Actividad no encontrada para el usuario.")
 
 user_service: UserService = UserService()
