@@ -2,14 +2,18 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from models import Activity
 from models.user import User
+from schemas.activity_schema import ActivityForUserOut
 from schemas.user_schema import UserCreate, UserUpdate
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
 from sqlalchemy import update
 from models.user_activity import user_activity
+from api.services.organizer_service import organizer_service
+
 class UserService:
     _repo: UserRepo = user_repo
     _category_service = category_service
+    _organizer_service = organizer_service
 
     def create_user(self, db: Session, user_create: UserCreate) -> User:
         user = User(
@@ -149,16 +153,43 @@ class UserService:
         else:
             raise ValueError("No se encuentra un organizador cone este email")
 
-    def get_user_activities(self, db: Session, user_id: int) -> list[Activity]:
+    # def get_user_activities(self, db: Session, user_id: int) -> list[Activity]:
+    #
+    #     user = self._repo.get_user(db=db, user_id=user_id)
+    #     if not user:
+    #         raise ValueError("User not found")
+    #
+    #     return user.activities
 
-        user = self._repo.get_user(db=db, user_id=user_id)
-        if not user:
-            raise ValueError("User not found")
-        # todo traer todas menos las assistance = False
+    def get_user_activities(self, db, user_id: int):
+        activities_data = self._repo.get_user_activities(db=db, user_id=user_id)
 
-        return user.activities
+        activities_list = []
 
-    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance: bool):
+        for activity, assistance in activities_data:
+
+            organizer_name = self._organizer_service.get_organizer(db, activity.organizer_id).name
+
+            activity_out = ActivityForUserOut(
+                id=activity.id,
+                name=activity.name,
+                place_id=activity.place_id,
+                date=activity.date,
+                price=activity.price,
+                organizer_id=activity.organizer_id,
+                organizer_name=organizer_name,
+                description=activity.description,
+                image_path=activity.image_path,
+                category_id=activity.category_id,
+                cancelled=activity.cancelled,
+                assistance=assistance
+            )
+
+            activities_list.append(activity_out)
+
+        return activities_list
+
+    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance):
         user = self._repo.get_user(db=db, user_id=user_id)
         if not user:
             raise ValueError("User not found")
@@ -176,6 +207,6 @@ class UserService:
                 db.commit()
                 return {"assistance": assistance}
 
-            raise ValueError("Actividad no encontrada para el usuario.")
+        raise ValueError("Actividad no encontrada para el usuario.")
 
 user_service: UserService = UserService()

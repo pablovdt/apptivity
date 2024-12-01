@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy import or_
 from api.services.category_service import category_service
 from models import Category
 from models.user import User
 from typing import Optional
+from models.user_activity import user_activity
+from models.activity import Activity
 
 
 class UserRepo:
@@ -30,7 +32,6 @@ class UserRepo:
                 else:
                     query = query.filter(getattr(User, key) == value)
         return query.all()
-
 
     @staticmethod
     def update_user(db: Session, user_id: int, user_data: dict) -> Optional[User]:
@@ -80,6 +81,15 @@ class UserRepo:
     @staticmethod
     def get_user_by_email(db: Session, email: str) -> User:
         return db.query(User).filter(User.email == email).first()
+
+    @staticmethod
+    def get_user_activities(db: Session, user_id: int):
+        return db.query(Activity, user_activity.c.assistance) \
+            .join(user_activity, user_activity.c.activity_id == Activity.id) \
+            .filter(user_activity.c.user_id == user_id) \
+            .filter(
+            or_(user_activity.c.assistance == True, user_activity.c.assistance == None)) \
+            .all()
 
 
 user_repo: UserRepo = UserRepo()

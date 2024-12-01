@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, Union
 from datetime import datetime
 from decimal import Decimal
 
@@ -45,6 +45,23 @@ class ActivityUpdate(ActivityBase):
 
 class ActivityOut(ActivityBase):
     id: int
+
+    class Config:
+        orm_mode = True
+
+class ActivityForUserOut(BaseModel):
+    id: int
+    name: Optional[str]
+    place_id: Optional[int]
+    date: Optional[datetime]
+    price: Optional[Decimal]
+    organizer_id: Optional[int]
+    organizer_name: Optional[str]
+    description: Optional[str]
+    image_path:  Optional[str]
+    category_id: Optional[int]
+    cancelled: Optional[bool] = False
+    assistance: Union[bool, None]
 
     class Config:
         orm_mode = True
