@@ -6,6 +6,8 @@ from models.user import User
 from typing import Optional
 from models.user_activity import user_activity
 from models.activity import Activity
+from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn
+from datetime import datetime
 
 
 class UserRepo:
@@ -83,13 +85,53 @@ class UserRepo:
         return db.query(User).filter(User.email == email).first()
 
     @staticmethod
-    def get_user_activities(db: Session, user_id: int):
-        return db.query(Activity, user_activity.c.assistance) \
+    def get_user_activities(db: Session, user_id: int, filters: UserActivityFilters):
+
+        query = db.query(Activity, user_activity.c.assistance) \
             .join(user_activity, user_activity.c.activity_id == Activity.id) \
-            .filter(user_activity.c.user_id == user_id) \
-            .filter(
-            or_(user_activity.c.assistance == True, user_activity.c.assistance == None)) \
-            .all()
+            .filter(user_activity.c.user_id == user_id)
+
+        if not filters.all:
+            query = query.filter(
+                or_(user_activity.c.assistance == True, user_activity.c.assistance == None)
+            )
+
+        if filters.name:
+            query = query.filter(Activity.name.ilike(f"%{filters.name}%"))
+        if filters.date_from:
+            query = query.filter(Activity.date >= filters.date_from)
+        if filters.date_to:
+            query = query.filter(Activity.date <= filters.date_to)
+        if filters.organizer_id:
+            query = query.filter(Activity.organizer_id == filters.organizer_id)
+        if filters.cancelled is not None:
+            query = query.filter(Activity.cancelled == filters.cancelled)
+
+        if filters.is_date_order_asc:
+            query = query.order_by(Activity.date.asc())
+        else:
+            query = query.order_by(Activity.date.desc())
+
+        return query.all()
+
+    from datetime import datetime
+
+    @staticmethod
+    def get_user_more_activities(db: Session, user_more_activities: UserMoreActivitiesIn):
+        # actividades existentes del usuario
+        user_activities_subquery = (
+            db.query(user_activity.c.activity_id)
+            .filter(user_activity.c.user_id == user_more_activities.user_id)
+            .subquery()
+        )
+        #  actividades por categoría, no asociadas y con fecha superior a hoy
+        query = (
+            db.query(Activity)
+            .filter(Activity.category_id.in_(user_more_activities.categories_ids))
+            .filter(~Activity.id.in_(user_activities_subquery))
+            .filter(Activity.date > datetime.utcnow())
+        )
+        return query.all()
 
 
 user_repo: UserRepo = UserRepo()

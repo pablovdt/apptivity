@@ -1,7 +1,7 @@
 from typing import Optional, Any, List
 from pydantic import BaseModel
+from datetime import datetime
 
-from models import Category
 from schemas.category_schema import CategoryOut
 
 
@@ -34,3 +34,16 @@ class UserOut(UserBase):
 
     class Config:
         orm_mode = True
+
+class UserActivityFilters(BaseModel):
+    name: Optional[str] = None
+    date_from: Optional[datetime] = None
+    date_to: Optional[datetime] = None
+    organizer_id: Optional[int] = None
+    cancelled: Optional[bool] = None
+    is_date_order_asc: bool = True
+    all: Optional[bool] = None
+
+class UserMoreActivitiesIn(BaseModel):
+    user_id: Optional[int]
+    categories_ids: List[int] = []

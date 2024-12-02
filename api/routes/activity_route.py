@@ -27,7 +27,7 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-# Obtener todas las actividades (con filtros opcionales)
+
 @router.get("/activities/", response_model=List[ActivityOut])
 def get_all_activities(filters: ActivityFilters = Depends(), db: Session = Depends(get_db)):
     try:

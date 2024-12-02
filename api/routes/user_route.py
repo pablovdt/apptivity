@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Dict
 from schemas.activity_schema import ActivityOut, ActivityForUserOut
-from schemas.user_schema import UserCreate, UserUpdate, UserOut
+from schemas.user_schema import UserCreate, UserUpdate, UserOut, UserActivityFilters, UserMoreActivitiesIn
 from api.services.user_service import user_service
 from database import get_db
 from typing import List, Optional
@@ -17,6 +17,13 @@ def create_user(user_create: UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/add_user_activity", status_code=201)
+def add_user_activity(user_id: int, activity_id: int, db: Session = Depends(get_db)):
+    try:
+        user_service.add_user_activity(db=db, user_id=user_id, activity_id=activity_id)
+        return f"Actividad  {activity_id} asociada a usuario {user_id}."
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/user/{user_id}/", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
@@ -78,16 +85,37 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{user_id}/activities", response_model=List[ActivityForUserOut])
-def get_user_activities(user_id: int, db: Session = Depends(get_db)):
+def get_user_activities(user_id: int, filters: UserActivityFilters = Depends(), db: Session = Depends(get_db)):
     try:
-        return user_service.get_user_activities(db=db, user_id=user_id)
+        return user_service.get_user_activities(db=db, user_id=user_id, filters=filters)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.patch("/{user_id}/activities/{activity_id}/{assistance}", response_model=Dict[str, bool])
-def update_assistance(user_id: int, activity_id: int, assistance, db: Session = Depends(get_db)):
+@router.get("/more_activities", response_model=List[ActivityForUserOut])
+def get_user_more_activities(
+        user_id: int,
+        categories_ids: List[int] = Query(...),
+        db: Session = Depends(get_db)
+):
     try:
-        return user_service.update_assistance(db=db,user_id=user_id, activity_id=activity_id, assistance=assistance)
+        user_more_activities = UserMoreActivitiesIn(
+            user_id=user_id,
+            categories_ids=categories_ids
+        )
+        return user_service.get_user_more_activities(db=db, user_more_activities=user_more_activities)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/{user_id}/activities/{activity_id}", response_model=Dict[str, Optional[bool]])
+def update_assistance(
+        user_id: int,
+        activity_id: int,
+        assistance: Optional[bool] = Query(default=None),
+        db: Session = Depends(get_db)
+):
+    try:
+        return user_service.update_assistance(db=db, user_id=user_id, activity_id=activity_id, assistance=assistance)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

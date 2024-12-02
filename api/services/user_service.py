@@ -3,12 +3,13 @@ from datetime import datetime
 from models import Activity
 from models.user import User
 from schemas.activity_schema import ActivityForUserOut
-from schemas.user_schema import UserCreate, UserUpdate
+from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
 from sqlalchemy import update
 from models.user_activity import user_activity
 from api.services.organizer_service import organizer_service
+
 
 class UserService:
     _repo: UserRepo = user_repo
@@ -64,6 +65,25 @@ class UserService:
 
         return user
 
+    def add_user_activity(self, db: Session, user_id: int, activity_id: int):
+        user = self._repo.get_user(db=db, user_id=user_id)
+
+        if not user:
+            raise ValueError("User not found")
+
+        db.execute(
+            user_activity.insert().values(
+                user_id=user.id,
+                activity_id=activity_id,
+                assistance=None,
+                inserted=datetime.utcnow(),
+                updated=datetime.utcnow()
+            )
+        )
+
+        db.commit()
+        db.refresh(user)
+                
     def get_user(self, db: Session, user_id: int) -> User:
         user = self._repo.get_user(db=db, user_id=user_id)
         if user:
@@ -138,7 +158,6 @@ class UserService:
     def delete_user(self, db: Session, user_id: int):
         self._repo.delete_user(db=db, user_id=user_id)
 
-
     def get_password_by_email(self, db: Session, email: str) -> str:
         password = self._repo.get_password_by_email(db=db, email=email)
         if password:
@@ -161,13 +180,12 @@ class UserService:
     #
     #     return user.activities
 
-    def get_user_activities(self, db, user_id: int):
-        activities_data = self._repo.get_user_activities(db=db, user_id=user_id)
+    def get_user_activities(self, db, user_id: int, filters: UserActivityFilters):
+        activities_data = self._repo.get_user_activities(db=db, user_id=user_id, filters=filters)
 
         activities_list = []
 
         for activity, assistance in activities_data:
-
             organizer_name = self._organizer_service.get_organizer(db, activity.organizer_id).name
 
             activity_out = ActivityForUserOut(
@@ -189,7 +207,34 @@ class UserService:
 
         return activities_list
 
-    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance):
+    def get_user_more_activities(self, db, user_more_activities: UserMoreActivitiesIn):
+        activities_data = self._repo.get_user_more_activities(db=db, user_more_activities=user_more_activities)
+
+        activities_list = []
+
+        for activity in activities_data:
+            organizer_name = self._organizer_service.get_organizer(db, activity.organizer_id).name
+
+            activity_out = ActivityForUserOut(
+                id=activity.id,
+                name=activity.name,
+                place_id=activity.place_id,
+                date=activity.date,
+                price=activity.price,
+                organizer_id=activity.organizer_id,
+                organizer_name=organizer_name,
+                description=activity.description,
+                image_path=activity.image_path,
+                category_id=activity.category_id,
+                cancelled=activity.cancelled,
+                assistance=None
+            )
+
+            activities_list.append(activity_out)
+
+        return activities_list
+
+    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance: bool):
         user = self._repo.get_user(db=db, user_id=user_id)
         if not user:
             raise ValueError("User not found")
@@ -208,5 +253,6 @@ class UserService:
                 return {"assistance": assistance}
 
         raise ValueError("Actividad no encontrada para el usuario.")
+
 
 user_service: UserService = UserService()

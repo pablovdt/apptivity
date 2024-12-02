@@ -23,10 +23,11 @@ class ActivityFilters(BaseModel):
     place_id: Optional[int] = None
     date_from: Optional[datetime] = None
     date_to: Optional[datetime] = None
-    # category_ids: Optional[List[int]] = None
     organizer_id: Optional[int] = None
     cancelled: Optional[bool] = None
     is_date_order_asc: bool = True
+    order_by_assistance: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class ActivityCreate(ActivityBase):

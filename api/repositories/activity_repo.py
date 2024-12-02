@@ -27,13 +27,20 @@ class ActivityRepo:
             query = query.filter(Activity.cancelled == filters.cancelled)
         if filters.place_id:
             query = query.filter(Activity.place_id == filters.place_id)
-        if filters.organizer_id:
-            query = query.filter(Activity.organizer_id == filters.organizer_id)
+
+        if filters.order_by_assistance:
+            query = query.order_by(Activity.number_of_assistances.desc())
 
         if filters.is_date_order_asc:
             query = query.order_by(Activity.date.asc())
         else:
             query = query.order_by(Activity.date.desc())
+
+        if filters.organizer_id:
+            query = query.filter(Activity.organizer_id == filters.organizer_id)
+
+        if filters.limit:
+            query = query.limit(filters.limit)
 
         return query.all()
 
