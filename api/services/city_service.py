@@ -42,3 +42,5 @@ class CityService:
             self._repo.delete_city(db=db, city_cp=city_cp)
         except ValueError as e:
             raise ValueError(str(e))
+
+city_service: CityService = CityService()

@@ -1,4 +1,8 @@
 from sqlalchemy.orm import Session
+
+from api.services.city_service import city_service
+from api.services.organizer_service import organizer_service
+from core.haversine import haversine
 from models.activity import Activity
 from schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityFilters
 from api.repositories.activity_repo import activity_repo, ActivityRepo
@@ -10,6 +14,8 @@ from models.user_activity import user_activity
 class ActivityService:
     _repo: ActivityRepo = activity_repo
     _user_service = user_service
+    _organizer_service = organizer_service
+    _city_service = city_service
 
     def create_activity(self, db: Session, activity_create: ActivityCreate) -> Activity:
         activity = Activity(
@@ -32,15 +38,25 @@ class ActivityService:
         users = self._user_service.get_all_users(db=db, filters={"categories": [activity_create.category_id]})
 
         for user in users:
-            db.execute(
-                user_activity.insert().values(
-                    user_id=user.id,
-                    activity_id=activity.id,
-                    assistance=None,
-                    inserted=datetime.utcnow(),
-                    updated=datetime.utcnow()
+            user_city = city_service.get_city_by_id(db=db, city_id=user.city_id)
+            organizer = organizer_service.get_organizer(db=db, organizer_id=activity.organizer_id)
+            organizer_city = city_service.get_city_by_id(db=db, city_id=organizer.city_id)
+
+            distance_between_user_and_activity = haversine(user_city.latitude,
+                                                           user_city.longitude,
+                                                           organizer_city.latitude,
+                                                           organizer_city.longitude)
+
+            if distance_between_user_and_activity < user.notification_distance:
+                db.execute(
+                    user_activity.insert().values(
+                        user_id=user.id,
+                        activity_id=activity.id,
+                        assistance=None,
+                        inserted=datetime.utcnow(),
+                        updated=datetime.utcnow()
+                    )
                 )
-            )
 
         db.commit()
         db.refresh(activity)

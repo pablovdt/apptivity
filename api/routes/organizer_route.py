@@ -63,3 +63,11 @@ def get_organizer_by_email(email: str, db: Session = Depends(get_db)):
         return organizer_service.get_organizer_by_email(db=db, email=email)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/user_coordinates/{organizer_id}", response_model=list[dict])
+def get_coordinates_from_users(organizer_id: int, db: Session = Depends(get_db)):
+    try:
+        return organizer_service.get_coordinates_from_users(db=db, organizer_id=organizer_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

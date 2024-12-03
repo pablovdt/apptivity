@@ -9,12 +9,15 @@ from api.services.category_service import category_service
 from sqlalchemy import update
 from models.user_activity import user_activity
 from api.services.organizer_service import organizer_service
+from api.services.city_service import city_service
+from core.haversine import haversine
 
 
 class UserService:
     _repo: UserRepo = user_repo
     _category_service = category_service
     _organizer_service = organizer_service
+    _city_service = city_service
 
     def create_user(self, db: Session, user_create: UserCreate) -> User:
         user = User(
@@ -50,15 +53,28 @@ class UserService:
             )
 
             for activity in activities:
-                db.execute(
-                    user_activity.insert().values(
-                        user_id=user.id,
-                        activity_id=activity.id,
-                        assistance=None,
-                        inserted=datetime.utcnow(),
-                        updated=datetime.utcnow()
+
+                # calculo de la distancia entre el usuario y la acticvidad
+
+                user_city = self._city_service.get_city_by_id(db=db, city_id=user.city_id)
+                organizer = self._organizer_service.get_organizer(db=db, organizer_id=activity.organizer_id)
+                organizer_city = self._city_service.get_city_by_id(db=db, city_id=organizer.city_id)
+
+                distance_between_user_and_activity = haversine(user_city.latitude,
+                                                               user_city.longitude,
+                                                               organizer_city.latitude,
+                                                               organizer_city.longitude)
+
+                if distance_between_user_and_activity < user.notification_distance:
+                    db.execute(
+                        user_activity.insert().values(
+                            user_id=user.id,
+                            activity_id=activity.id,
+                            assistance=None,
+                            inserted=datetime.utcnow(),
+                            updated=datetime.utcnow()
+                        )
                     )
-                )
 
             db.commit()
             db.refresh(user)
@@ -83,7 +99,7 @@ class UserService:
 
         db.commit()
         db.refresh(user)
-                
+
     def get_user(self, db: Session, user_id: int) -> User:
         user = self._repo.get_user(db=db, user_id=user_id)
         if user:
@@ -140,15 +156,28 @@ class UserService:
             db.refresh(user)
 
             for activity in activities:
-                db.execute(
-                    user_activity.insert().values(
-                        user_id=user.id,
-                        activity_id=activity.id,
-                        assistance=None,
-                        inserted=datetime.utcnow(),
-                        updated=datetime.utcnow()
+
+                # calculo de la distancia entre el usuario y la acticvidad
+
+                user_city = city_service.get_city_by_id(db=db, city_id=user.city_id)
+                organizer = organizer_service.get_organizer(db=db, organizer_id=activity.organizer_id)
+                organizer_city = city_service.get_city_by_id(db=db, city_id=organizer.city_id)
+
+                distance_between_user_and_activity = haversine(user_city.latitude,
+                                                               user_city.longitude,
+                                                               organizer_city.latitude,
+                                                               organizer_city.longitude)
+
+                if distance_between_user_and_activity < user.notification_distance:
+                    db.execute(
+                        user_activity.insert().values(
+                            user_id=user.id,
+                            activity_id=activity.id,
+                            assistance=None,
+                            inserted=datetime.utcnow(),
+                            updated=datetime.utcnow()
+                        )
                     )
-                )
 
         db.commit()
         db.refresh(user)
