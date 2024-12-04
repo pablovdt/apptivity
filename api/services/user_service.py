@@ -111,8 +111,8 @@ class UserService:
         return self._repo.get_all_users(db=db, filters=filters)
 
     def update_user(self, db: Session, user_id: int, user_update: UserUpdate) -> User:
-        # todo, cambiar por         user = self._repo.get_user(db=db, user_id=user_id) ?????
-        user = db.query(User).filter(User.id == user_id).first()
+
+        user = user_service.get_user(db=db, user_id=user_id)
 
         if not user:
             raise ValueError("User not found")
@@ -130,7 +130,7 @@ class UserService:
         if user_update.settings is not None:
             user.settings = user_update.settings
 
-        if user_update.categories is not None:
+        if len(user_update.categories) > 0 :
             user.categories.clear()
 
             categories = []
