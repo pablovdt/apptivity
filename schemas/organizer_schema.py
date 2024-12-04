@@ -33,3 +33,11 @@ class OrganizerOut(OrganizerBase):
 
     class Config:
         orm_mode = True
+
+class OrganizerForUserOut(BaseModel):
+    id: int
+    name: str
+    city_id: int
+    description: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None

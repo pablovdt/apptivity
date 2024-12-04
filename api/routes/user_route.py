@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Dict
 from schemas.activity_schema import ActivityOut, ActivityForUserOut
+from schemas.organizer_schema import OrganizerForUserOut
 from schemas.user_schema import UserCreate, UserUpdate, UserOut, UserActivityFilters, UserMoreActivitiesIn
 from api.services.user_service import user_service
 from database import get_db
@@ -22,6 +23,14 @@ def add_user_activity(user_id: int, activity_id: int, db: Session = Depends(get_
     try:
         user_service.add_user_activity(db=db, user_id=user_id, activity_id=activity_id)
         return f"Actividad  {activity_id} asociada a usuario {user_id}."
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/add_user_organizer", status_code=201)
+def add_user_organizer(user_id: int, organizer_id: int, db: Session = Depends(get_db)):
+    try:
+        user_service.add_user_organizer(db=db, user_id=user_id, organizer_id=organizer_id)
+        return f"Usuario {user_id} suscrito  a organizador {organizer_id}."
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -104,6 +113,13 @@ def get_user_more_activities(
             categories_ids=categories_ids
         )
         return user_service.get_user_more_activities(db=db, user_more_activities=user_more_activities)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/{user_id}/organizers", response_model=List[OrganizerForUserOut])
+def get_user_organizers(user_id: int, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_user_organizers(db=db, user_id=user_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

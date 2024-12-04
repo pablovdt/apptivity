@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from api.services.category_service import category_service
-from models import Category
+from models import Category, Organizer
 from models.user import User
 from typing import Optional
 from models.user_activity import user_activity
 from models.activity import Activity
 from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn
 from datetime import datetime
-
+from models.user_organizer import user_organizer
 
 class UserRepo:
     @staticmethod
@@ -133,5 +133,14 @@ class UserRepo:
         )
         return query.all()
 
+    @staticmethod
+    def get_user_organizers(db: Session, user_id: int):
+
+        query = db.query(Organizer) \
+            .join(user_organizer, user_organizer.c.organizer_id == Organizer.id) \
+            .filter(user_activity.c.user_id == user_id)
+
+
+        return query.all()
 
 user_repo: UserRepo = UserRepo()

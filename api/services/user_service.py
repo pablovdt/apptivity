@@ -11,6 +11,7 @@ from models.user_activity import user_activity
 from api.services.organizer_service import organizer_service
 from api.services.city_service import city_service
 from core.haversine import haversine
+from models.user_organizer import user_organizer
 
 
 class UserService:
@@ -92,6 +93,24 @@ class UserService:
                 user_id=user.id,
                 activity_id=activity_id,
                 assistance=None,
+                inserted=datetime.utcnow(),
+                updated=datetime.utcnow()
+            )
+        )
+
+        db.commit()
+        db.refresh(user)
+
+    def add_user_organizer(self, user_id: int, organizer_id: int, db: Session):
+        user = self._repo.get_user(db=db, user_id=user_id)
+
+        if not user:
+            raise ValueError("User not found")
+
+        db.execute(
+            user_organizer.insert().values(
+                user_id=user.id,
+                organizer_id=organizer_id,
                 inserted=datetime.utcnow(),
                 updated=datetime.utcnow()
             )
@@ -236,6 +255,11 @@ class UserService:
             activities_list.append(activity_out)
 
         return activities_list
+
+    def get_user_organizers(self, db, user_id: int):
+        return self._repo.get_user_organizers(db=db, user_id=user_id)
+
+
 
     def get_user_more_activities(self, db, user_more_activities: UserMoreActivitiesIn):
         activities_data = self._repo.get_user_more_activities(db=db, user_more_activities=user_more_activities)
