@@ -87,13 +87,13 @@ class UserRepo:
     @staticmethod
     def get_user_activities(db: Session, user_id: int, filters: UserActivityFilters):
 
-        query = db.query(Activity, user_activity.c.assistance) \
+        query = db.query(Activity, user_activity.c.possible_assistance, user_activity.c.assistance) \
             .join(user_activity, user_activity.c.activity_id == Activity.id) \
             .filter(user_activity.c.user_id == user_id)
 
         if not filters.all:
             query = query.filter(
-                or_(user_activity.c.assistance == True, user_activity.c.assistance == None)
+                or_(user_activity.c.possible_assistance == True, user_activity.c.possible_assistance == None)
             )
 
         if filters.name:

@@ -16,6 +16,7 @@ class Activity(Base):
     description = Column(Text)
     category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     cancelled = Column(Boolean, default=False)
+    number_of_possible_assistances = Column(Integer, default=0)
     number_of_assistances = Column(Integer, default=0)
     number_of_shipments = Column(Integer, default=0)
     number_of_discards = Column(Integer, default=0)

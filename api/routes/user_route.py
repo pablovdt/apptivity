@@ -112,10 +112,10 @@ def get_user_more_activities(
 def update_assistance(
         user_id: int,
         activity_id: int,
-        assistance: Optional[bool] = Query(default=None),
+        possible_assistance: Optional[bool] = Query(default=None),
         db: Session = Depends(get_db)
 ):
     try:
-        return user_service.update_assistance(db=db, user_id=user_id, activity_id=activity_id, assistance=assistance)
+        return user_service.update_possible_assistance(db=db, user_id=user_id, activity_id=activity_id, possible_assistance=possible_assistance)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

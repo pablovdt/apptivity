@@ -15,6 +15,7 @@ class ActivityBase(BaseModel):
     category_id: Optional[int]
     cancelled: Optional[bool] = False
     number_of_assistances: Optional[int]
+    number_of_possible_assistances: Optional[int]
     number_of_shipments: Optional[int]
     number_of_discards: Optional[int]
 
@@ -63,6 +64,7 @@ class ActivityForUserOut(BaseModel):
     category_id: Optional[int]
     cancelled: Optional[bool] = False
     assistance: Union[bool, None]
+    possible_assistance: Union[bool, None]
 
     class Config:
         orm_mode = True

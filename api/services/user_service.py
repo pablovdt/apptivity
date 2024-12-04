@@ -214,7 +214,7 @@ class UserService:
 
         activities_list = []
 
-        for activity, assistance in activities_data:
+        for activity, possible_assistance,  assistance in activities_data:
             organizer_name = self._organizer_service.get_organizer(db, activity.organizer_id).name
 
             activity_out = ActivityForUserOut(
@@ -229,6 +229,7 @@ class UserService:
                 image_path=activity.image_path,
                 category_id=activity.category_id,
                 cancelled=activity.cancelled,
+                possible_assistance=possible_assistance,
                 assistance=assistance
             )
 
@@ -263,7 +264,7 @@ class UserService:
 
         return activities_list
 
-    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance: bool):
+    def update_possible_assistance(self, db: Session, user_id: int, activity_id: int, possible_assistance: bool):
         user = self._repo.get_user(db=db, user_id=user_id)
         if not user:
             raise ValueError("User not found")
@@ -276,10 +277,10 @@ class UserService:
                         user_activity.c.user_id == user_id,
                         user_activity.c.activity_id == activity_id
                     )
-                    .values(assistance=assistance, updated=datetime.utcnow())
+                    .values(possible_assistance=possible_assistance, updated=datetime.utcnow())
                 )
                 db.commit()
-                return {"assistance": assistance}
+                return {"posible assistance": possible_assistance}
 
         raise ValueError("Actividad no encontrada para el usuario.")
 
