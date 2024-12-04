@@ -11,6 +11,7 @@ from typing import Dict
 from datetime import datetime
 from models.user_activity import user_activity
 
+
 class ActivityService:
     _repo: ActivityRepo = activity_repo
     _user_service = user_service
@@ -25,7 +26,7 @@ class ActivityService:
             price=activity_create.price,
             organizer_id=activity_create.organizer_id,
             description=activity_create.description,
-            image_path=activity_create.image_path if activity_create.image_path else "images/logotipo_apptivity.png" ,
+            image_path=activity_create.image_path if activity_create.image_path else "images/logotipo_apptivity.png",
             category_id=activity_create.category_id,
             cancelled=activity_create.cancelled,
             number_of_assistances=activity_create.number_of_assistances,
@@ -35,8 +36,7 @@ class ActivityService:
 
         activity_saved = self._repo.save_activity(db=db, activity=activity)
 
-        users = self._user_service.get_all_users(db=db, filters={"categories": [activity_create.category_id]})
-
+        users = self._user_service.get_all_users(db=db)
         for user in users:
             user_city = city_service.get_city_by_id(db=db, city_id=user.city_id)
             organizer = organizer_service.get_organizer(db=db, organizer_id=activity.organizer_id)
@@ -47,7 +47,14 @@ class ActivityService:
                                                            organizer_city.latitude,
                                                            organizer_city.longitude)
 
-            if distance_between_user_and_activity < user.notification_distance:
+            # la actividad creada se le asigna a un usuario depende de:
+            #   Si la categoria de la actividad es igual a una categoria del usuario y la distancia es menor
+            #   O si estas suscrito
+            if (
+                    (distance_between_user_and_activity < user.notification_distance and
+                     any(category.id == activity.category_id for category in user.categories)) or
+                    any(u.id == user.id for u in organizer.users)
+            ):
                 db.execute(
                     user_activity.insert().values(
                         user_id=user.id,
@@ -90,7 +97,6 @@ class ActivityService:
                 result[month_name] += activity.activity_count
 
         return result
-
 
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Activity:
         activity = self.get_activity(db=db, activity_id=activity_id)

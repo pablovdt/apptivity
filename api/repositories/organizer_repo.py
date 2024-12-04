@@ -1,9 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, distinct, join, and_
+from sqlalchemy.testing.suite.test_reflection import users
+
 from models import Activity, City, User
 from models.organizer import Organizer
 from models.user_activity import user_activity
+from schemas.category_schema import CategoryOut
 from schemas.organizer_schema import OrganizerOut
+from schemas.user_schema import UserOut
 
 
 class OrganizerRepo:
@@ -22,6 +26,22 @@ class OrganizerRepo:
         if result:
             organizer, latitude, longitude = result
 
+            users = [
+                UserOut(
+                    id=user.id,
+                    name=user.name,
+                    email=user.email,
+                    city_id=user.city_id,
+                    settings=user.settings,
+                    notification_distance=user.notification_distance,
+                    categories=[
+                        CategoryOut(id=category.id, name=category.name)
+                        for category in user.categories
+                    ]
+                )
+                for user in organizer.users
+            ]
+
             return OrganizerOut(
                 id=organizer.id,
                 name=organizer.name,
@@ -32,7 +52,8 @@ class OrganizerRepo:
                 phone=organizer.phone,
                 image_path=organizer.image_path,
                 city_latitude=latitude,
-                city_longitude=longitude
+                city_longitude=longitude,
+                users=users
             )
 
     @staticmethod

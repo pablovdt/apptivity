@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+from schemas.user_schema import UserOut
 
 
 class OrganizerBase(BaseModel):
@@ -30,9 +32,11 @@ class OrganizerOut(OrganizerBase):
     id: int
     city_longitude: Optional[float] = None
     city_latitude: Optional[float] = None
+    users: List[UserOut] = None
 
     class Config:
         orm_mode = True
+
 
 class OrganizerForUserOut(BaseModel):
     id: int

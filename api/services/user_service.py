@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from models import Activity
+
+from api.repositories.organizer_repo import OrganizerRepo
+from models import Activity, Organizer
 from models.user import User
-from schemas.activity_schema import ActivityForUserOut
+from schemas.activity_schema import ActivityForUserOut, ActivityFilters
 from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
@@ -16,6 +18,7 @@ from models.user_organizer import user_organizer
 
 class UserService:
     _repo: UserRepo = user_repo
+    _activity_service = None
     _category_service = category_service
     _organizer_service = organizer_service
     _city_service = city_service
@@ -102,6 +105,7 @@ class UserService:
         db.refresh(user)
 
     def add_user_organizer(self, user_id: int, organizer_id: int, db: Session):
+        # add user and organizer in user_organizer table
         user = self._repo.get_user(db=db, user_id=user_id)
 
         if not user:
@@ -115,6 +119,20 @@ class UserService:
                 updated=datetime.utcnow()
             )
         )
+
+        # insert all activities from organizer in user_activities
+        from api.services.activity_service import activity_service
+        self._activity_service = activity_service
+        activity_filters: ActivityFilters = ActivityFilters()
+        activity_filters.organizer_id = organizer_id
+        activity_filters.date_from = datetime.now()
+        organizer_activities = self._activity_service.get_all_activities(db=db, filters=activity_filters)
+
+        for activity in organizer_activities:
+            user_activity_ids = [activity.id for activity in user.activities]
+
+            if activity.id not in user_activity_ids:
+                self.add_user_activity(db=db, user_id=user_id, activity_id=activity.id)
 
         db.commit()
         db.refresh(user)
