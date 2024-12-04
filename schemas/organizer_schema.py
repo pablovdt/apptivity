@@ -28,8 +28,8 @@ class OrganizerUpdate(BaseModel):
 
 class OrganizerOut(OrganizerBase):
     id: int
-    city_longitude: Optional[float]
-    city_latitude: Optional[float]
+    city_longitude: Optional[float] = None
+    city_latitude: Optional[float] = None
 
     class Config:
         orm_mode = True

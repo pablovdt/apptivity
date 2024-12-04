@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
-from sqlalchemy.dialects.postgresql import VARCHAR
+from sqlalchemy.orm import relationship
 from database import Base
 
 class Organizer(Base):
@@ -13,3 +13,5 @@ class Organizer(Base):
     phone = Column(String(20))
     password = Column(String(255), nullable=False)
     image_path = Column(String(255))
+
+    users = relationship('User', secondary='user_organizer', back_populates='organizers')

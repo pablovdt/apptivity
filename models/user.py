@@ -19,3 +19,5 @@ class User(Base):
     categories = relationship('Category', secondary='user_category', back_populates='users')
 
     activities = relationship('Activity', secondary='user_activity', back_populates='users')
+
+    organizers = relationship('Organizer', secondary='user_organizer', back_populates='users')
