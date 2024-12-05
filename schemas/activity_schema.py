@@ -14,10 +14,8 @@ class ActivityBase(BaseModel):
     image_path:  Optional[str]
     category_id: Optional[int]
     cancelled: Optional[bool] = False
-    number_of_assistances: Optional[int]
-    number_of_possible_assistances: Optional[int]
-    number_of_shipments: Optional[int]
-    number_of_discards: Optional[int]
+
+
 
 class ActivityFilters(BaseModel):
     name: Optional[str] = None
@@ -41,12 +39,17 @@ class ActivityCreate(ActivityBase):
     category_id: int
 
 
+
 class ActivityUpdate(ActivityBase):
     pass
 
 
 class ActivityOut(ActivityBase):
     id: int
+    number_of_possible_assistances: Optional[int]
+    number_of_assistances: Optional[int]
+    number_of_shipments: Optional[int]
+    number_of_discards: Optional[int]
 
     class Config:
         orm_mode = True

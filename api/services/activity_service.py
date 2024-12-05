@@ -28,10 +28,7 @@ class ActivityService:
             description=activity_create.description,
             image_path=activity_create.image_path if activity_create.image_path else "images/logotipo_apptivity.png",
             category_id=activity_create.category_id,
-            cancelled=activity_create.cancelled,
-            number_of_assistances=activity_create.number_of_assistances,
-            number_of_shipments=activity_create.number_of_shipments,
-            number_of_discards=activity_create.number_of_discards
+            cancelled=activity_create.cancelled
         )
 
         activity_saved = self._repo.save_activity(db=db, activity=activity)
@@ -47,6 +44,7 @@ class ActivityService:
                                                            organizer_city.latitude,
                                                            organizer_city.longitude)
 
+            print(f"distancia: {distance_between_user_and_activity}")
             # la actividad creada se le asigna a un usuario depende de:
             #   Si la categoria de la actividad es igual a una categoria del usuario y la distancia es menor
             #   O si estas suscrito

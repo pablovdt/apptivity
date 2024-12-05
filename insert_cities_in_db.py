@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 from sqlalchemy.orm import declarative_base, Session
-
 from dotenv import load_dotenv
 import os
-
-from models import City, Place, Category
+from api.services.category_service import category_service
+from models import City, Place
+from schemas.category_schema import CategoryCreate
 
 load_dotenv()
 
@@ -235,76 +235,12 @@ def insert_places_from_cities():
             print(f"Error al insertar datos: {e}")
 
 
-def insert_categories_to_db():
-    with Session(engine) as session:
-        try:
-            categories = [
-                {"name": "Gastronomía"},
-                {"name": "Música en vivo"},
-                {"name": "Cine al aire libre"},
-                {"name": "Teatro local"},
-                {"name": "Ferias artesanales"},
-                {"name": "Rutas de senderismo"},
-                {"name": "Festival de danzas tradicionales"},
-                {"name": "Talleres de manualidades"},
-                {"name": "Exposiciones de arte local"},
-                {"name": "Mercadillos rurales"},
-                {"name": "Carreras populares"},
-                {"name": "Competencias deportivas"},
-                {"name": "Ferias agrícolas"},
-                {"name": "Fiestas patronales"},
-                {"name": "Rutas a caballo"},
-                {"name": "Juegos tradicionales"},
-                {"name": "Festival de cine rural"},
-                {"name": "Encuentros literarios"},
-                {"name": "Talleres de cocina tradicional"},
-                {"name": "Catas de vino y queso"},
-                {"name": "Actividades de observación astronómica"},
-                {"name": "Conciertos en la plaza"},
-                {"name": "Exhibiciones de coches antiguos"},
-                {"name": "Festival de folklore"},
-                {"name": "Clases de yoga al aire libre"},
-                {"name": "Torneos de ajedrez"},
-                {"name": "Mercados nocturnos"},
-                {"name": "Fiestas de disfraces"},
-                {"name": "Rutas en bicicleta"},
-                {"name": "Excursiones guiadas"},
-                {"name": "Cursos de fotografía"},
-                {"name": "Festival de poesía"},
-                {"name": "Concursos de pintura rápida"},
-                {"name": "Feria del libro"},
-                {"name": "Actividades acuáticas en ríos"},
-                {"name": "Espectáculos de títeres"},
-                {"name": "Caminatas solidarias"},
-                {"name": "Festival de comida internacional"},
-                {"name": "Jornadas de historia local"},
-                {"name": "Talleres de cerámica"},
-                {"name": "Festival de cerveza artesanal"},
-                {"name": "Exhibiciones de cetrería"},
-                {"name": "Encuentros de motos clásicas"},
-                {"name": "Día del árbol"},
-                {"name": "Actividades de pesca deportiva"},
-                {"name": "Visitas a granjas locales"},
-                {"name": "Festival del agua"},
-                {"name": "Cuentacuentos para niños"},
-                {"name": "Peregrinaciones locales"},
-                {"name": "Festival de flores"},
-                {"name": "Clases de baile tradicional"},
-            ]
-
-            category_objects = [Category(name=category["name"]) for category in categories]
-
-            session.add_all(category_objects)
-
-            session.commit()
-            print(f"Se han insertado {len(category_objects)} categorías correctamente.")
-        except Exception as e:
-            session.rollback()
-            print(f"Error al insertar datos: {e}")
 
 
 if __name__ == "__main__":
     # insert_cities_to_db(correct_cities)
     # insert_places_from_cities()
-    # insert_categories_to_db()
-    pass
+    insert_categories_to_db()
+
+
+
