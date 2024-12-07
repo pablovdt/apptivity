@@ -11,5 +11,6 @@ user_activity = Table(
     Column('assistance', Boolean, default=None, nullable=True),
     Column('inserted', DateTime(timezone=True), nullable=False, default=datetime.utcnow),
     Column('updated', DateTime(timezone=True), nullable=False, default=datetime.utcnow),
+    Column('updated_confirmed', Boolean, default=False, nullable=True),
     PrimaryKeyConstraint('user_id', 'activity_id')
 )

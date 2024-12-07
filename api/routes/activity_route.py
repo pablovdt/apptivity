@@ -27,13 +27,13 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-
 @router.get("/activities/", response_model=List[ActivityOut])
 def get_all_activities(filters: ActivityFilters = Depends(), db: Session = Depends(get_db)):
     try:
         return activity_service.get_all_activities(db=db, filters=filters)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.get("/activities_by_month/", response_model=Dict[str, int])
 def get_activities_by_month(organizer_id: int, year: int, db: Session = Depends(get_db)):
@@ -42,6 +42,7 @@ def get_activities_by_month(organizer_id: int, year: int, db: Session = Depends(
         return activities_by_month
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
 
 # Actualizar actividad por ID
 @router.patch("/activity/{activity_id}/", response_model=ActivityOut)

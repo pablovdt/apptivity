@@ -10,6 +10,7 @@ from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn
 from datetime import datetime
 from models.user_organizer import user_organizer
 
+
 class UserRepo:
     @staticmethod
     def save_user(db: Session, user: User) -> User:
@@ -140,7 +141,7 @@ class UserRepo:
             .join(user_organizer, user_organizer.c.organizer_id == Organizer.id) \
             .filter(user_activity.c.user_id == user_id)
 
-
         return query.all()
+
 
 user_repo: UserRepo = UserRepo()

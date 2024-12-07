@@ -10,7 +10,7 @@ from api.services.user_service import user_service
 from typing import Dict
 from datetime import datetime
 from models.user_activity import user_activity
-
+from sqlalchemy import update
 
 class ActivityService:
     _repo: ActivityRepo = activity_repo
@@ -96,11 +96,27 @@ class ActivityService:
 
         return result
 
+
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Activity:
         activity = self.get_activity(db=db, activity_id=activity_id)
+
+        if not activity:
+            raise ValueError(f"Activity with id {activity_id} not found")
+
         for key, value in activity_update.dict(exclude_unset=True).items():
             setattr(activity, key, value)
-        return self._repo.update_activity(db=db, activity=activity)
+            activity = self._repo.update_activity(db=db, activity=activity)
+
+        db.execute(
+            update(user_activity)
+            .where(user_activity.c.activity_id == activity_id)
+            .values(updated_confirmed=False, updated=datetime.utcnow())
+        )
+
+        db.commit()
+        db.refresh(activity)
+
+        return activity
 
     def delete_activity(self, db: Session, activity_id: int):
         activity = self.get_activity(db=db, activity_id=activity_id)

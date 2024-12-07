@@ -18,6 +18,7 @@ def create_user(user_create: UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/add_user_activity", status_code=201)
 def add_user_activity(user_id: int, activity_id: int, db: Session = Depends(get_db)):
     try:
@@ -26,6 +27,7 @@ def add_user_activity(user_id: int, activity_id: int, db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/add_user_organizer", status_code=201)
 def add_user_organizer(user_id: int, organizer_id: int, db: Session = Depends(get_db)):
     try:
@@ -33,6 +35,7 @@ def add_user_organizer(user_id: int, organizer_id: int, db: Session = Depends(ge
         return f"Usuario {user_id} suscrito  a organizador {organizer_id}."
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/user/{user_id}/", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
@@ -116,10 +119,18 @@ def get_user_more_activities(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
 @router.get("/{user_id}/organizers", response_model=List[OrganizerForUserOut])
 def get_user_organizers(user_id: int, db: Session = Depends(get_db)):
     try:
         return user_service.get_user_organizers(db=db, user_id=user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/{user_id}/activities_updated", response_model=List[ActivityForUserOut])
+def get_activities_updated(user_id: int, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_activities_updated(db=db, user_id=user_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -132,6 +143,21 @@ def update_assistance(
         db: Session = Depends(get_db)
 ):
     try:
-        return user_service.update_possible_assistance(db=db, user_id=user_id, activity_id=activity_id, possible_assistance=possible_assistance)
+        return user_service.update_possible_assistance(db=db, user_id=user_id, activity_id=activity_id,
+                                                       possible_assistance=possible_assistance)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/{user_id}/user_activities/{activity_id}", response_model=Dict[str, Optional[bool]])
+def update_activity_updated_confirmed(
+        user_id: int,
+        activity_id: int,
+        updated_confirmed: Optional[bool] = Query(default=None),
+        db: Session = Depends(get_db)
+):
+    try:
+        return user_service.update_activity_updated_confirmed(db=db, user_id=user_id, activity_id=activity_id,
+                                                       updated_confirmed=updated_confirmed)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

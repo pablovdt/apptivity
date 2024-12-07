@@ -167,7 +167,7 @@ class UserService:
         if user_update.settings is not None:
             user.settings = user_update.settings
 
-        if len(user_update.categories) > 0 :
+        if len(user_update.categories) > 0:
             user.categories.clear()
 
             categories = []
@@ -251,7 +251,7 @@ class UserService:
 
         activities_list = []
 
-        for activity, possible_assistance,  assistance in activities_data:
+        for activity, possible_assistance, assistance in activities_data:
             organizer_name = self._organizer_service.get_organizer(db, activity.organizer_id).name
 
             activity_out = ActivityForUserOut(
@@ -277,7 +277,9 @@ class UserService:
     def get_user_organizers(self, db, user_id: int):
         return self._repo.get_user_organizers(db=db, user_id=user_id)
 
-
+    def get_activities_updated(self, user_id: int, db: Session):
+        # TODO, IMPLEMENT
+        pass
 
     def get_user_more_activities(self, db, user_more_activities: UserMoreActivitiesIn):
         activities_data = self._repo.get_user_more_activities(db=db, user_more_activities=user_more_activities)
@@ -325,6 +327,24 @@ class UserService:
                 return {"posible assistance": possible_assistance}
 
         raise ValueError("Actividad no encontrada para el usuario.")
+
+    def update_activity_updated_confirmed(self, db: Session, user_id: int, activity_id: int, updated_confirmed: bool):
+
+        stmt = (
+            update(user_activity)
+            .where(
+                (user_activity.c.user_id == user_id) &
+                (user_activity.c.activity_id == activity_id)
+            )
+            .values(
+                updated_confirmed=updated_confirmed,
+                updated=datetime.utcnow()
+            )
+        )
+        db.execute(stmt)
+        db.commit()
+
+        return {f"updated confirmed in activity {activity_id} for user {user_id}": updated_confirmed}
 
 
 user_service: UserService = UserService()
