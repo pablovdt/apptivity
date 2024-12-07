@@ -127,7 +127,7 @@ def get_user_organizers(user_id: int, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@router.get("/{user_id}/activities_updated", response_model=List[ActivityForUserOut])
+@router.get("/{user_id}/activities_updated", response_model=List[dict])
 def get_activities_updated(user_id: int, db: Session = Depends(get_db)):
     try:
         return user_service.get_activities_updated(db=db, user_id=user_id)

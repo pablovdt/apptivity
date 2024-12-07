@@ -278,8 +278,19 @@ class UserService:
         return self._repo.get_user_organizers(db=db, user_id=user_id)
 
     def get_activities_updated(self, user_id: int, db: Session):
-        # TODO, IMPLEMENT
-        pass
+        # Consulta las actividades cuyo updated_confirmed sea False para el usuario dado
+        query = db.query(Activity.id, Activity.name) \
+            .join(user_activity, user_activity.c.activity_id == Activity.id) \
+            .filter(user_activity.c.user_id == user_id) \
+            .filter(user_activity.c.updated_confirmed == False)
+
+        # Obtén todas las actividades que cumplen con el criterio
+        activities = query.all()
+
+        # Si no hay actividades, devuelve una lista vacía
+        activities_list = [{"activity_id": activity.id, "name": activity.name} for activity in activities]
+
+        return activities_list
 
     def get_user_more_activities(self, db, user_more_activities: UserMoreActivitiesIn):
         activities_data = self._repo.get_user_more_activities(db=db, user_more_activities=user_more_activities)
