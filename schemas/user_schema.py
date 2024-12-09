@@ -47,3 +47,10 @@ class UserActivityFilters(BaseModel):
 class UserMoreActivitiesIn(BaseModel):
     user_id: Optional[int]
     categories_ids: List[int] = []
+
+class ValidateQrLocation(BaseModel):
+    activity_id: int
+    organizer_id: int
+    user_id: int
+    latitude: float
+    longitude: float

@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from typing import Dict
 from schemas.activity_schema import ActivityOut, ActivityForUserOut
 from schemas.organizer_schema import OrganizerForUserOut
-from schemas.user_schema import UserCreate, UserUpdate, UserOut, UserActivityFilters, UserMoreActivitiesIn
+from schemas.user_schema import UserCreate, UserUpdate, UserOut, UserActivityFilters, UserMoreActivitiesIn, \
+    ValidateQrLocation
 from api.services.user_service import user_service
 from database import get_db
 from typing import List, Optional
@@ -161,3 +162,11 @@ def update_activity_updated_confirmed(
                                                        updated_confirmed=updated_confirmed)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/validate_qr_and_location/", response_model=bool, status_code=200)
+def validate_qr_and_location(validate_qr_and_location: ValidateQrLocation, db: Session = Depends(get_db)):
+    try:
+        return user_service.validate_qr_and_location(db=db, validate_qr_and_location=validate_qr_and_location)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

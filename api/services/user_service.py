@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-
+import re
 from api.repositories.organizer_repo import OrganizerRepo
+from api.services.place_service import place_service
 from models import Activity, Organizer
 from models.user import User
 from schemas.activity_schema import ActivityForUserOut, ActivityFilters
-from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn
+from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn, ValidateQrLocation
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
 from sqlalchemy import update
@@ -22,6 +23,7 @@ class UserService:
     _category_service = category_service
     _organizer_service = organizer_service
     _city_service = city_service
+    _place_service = place_service
 
     def create_user(self, db: Session, user_create: UserCreate) -> User:
         user = User(
@@ -356,6 +358,55 @@ class UserService:
         db.commit()
 
         return {f"updated confirmed in activity {activity_id} for user {user_id}": updated_confirmed}
+
+    def update_assistance(self, db: Session, user_id: int, activity_id: int, assistance: bool):
+        user = self._repo.get_user(db=db, user_id=user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        for activity in user.activities:
+            if activity.id == activity_id:
+                db.execute(
+                    update(user_activity)
+                    .where(
+                        user_activity.c.user_id == user_id,
+                        user_activity.c.activity_id == activity_id
+                    )
+                    .values(assistance=assistance, updated=datetime.utcnow())
+                )
+                db.commit()
+
+
+    def validate_qr_and_location(self, db: Session, validate_qr_and_location: ValidateQrLocation) -> bool:
+        from api.services.activity_service import activity_service
+        self._activity_service = activity_service
+        activity = self._activity_service.get_activity(db=db, activity_id=validate_qr_and_location.activity_id)
+
+        place = self._place_service.get_place(db=db, place_id=activity.place_id)
+
+        pattern = r"q=([\-+]?[0-9]*\.?[0-9]+),([\-+]?[0-9]*\.?[0-9]+)"
+        match = re.search(pattern, place.location_url)
+
+        if match:
+            place_latitude = float(match.group(1))
+            place_longitude = float(match.group(2))
+        else:
+            return False
+
+        # comprobacion de la distancia entre el usuario escaneando el qr y la geolocalizacion de la actividad
+
+        distance = haversine(lat1=validate_qr_and_location.latitude,
+                             lon1=validate_qr_and_location.longitude,
+                             lat2=place_latitude,
+                             lon2=place_longitude
+                             )
+        # 100 m
+        if distance <= 0.1:
+            self.update_assistance(db=db, user_id=validate_qr_and_location.user_id, activity_id=activity.id,
+                                   assistance=True)
+            return True
+        else:
+            return False
 
 
 user_service: UserService = UserService()
