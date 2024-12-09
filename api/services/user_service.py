@@ -408,5 +408,7 @@ class UserService:
         else:
             return False
 
+    def get_assistances(self, db: Session, user_id: int):
+        return self._repo.get_assistances(db=db, user_id=user_id)
 
 user_service: UserService = UserService()

@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from models import City, Place
 from models.activity import Activity
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
@@ -43,6 +45,13 @@ class ActivityRepo:
             query = query.limit(filters.limit)
 
         return query.all()
+
+    @staticmethod
+    def get_activities_by_city( db: Session, city_id:int):
+        query = db.query(Activity).join(Place).join(City).filter(City.id == city_id)
+
+        activities = query.all()
+        return activities
 
     @staticmethod
     def get_activities_by_month(db: Session, organizer_id: int, year: int):

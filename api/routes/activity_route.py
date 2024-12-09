@@ -26,6 +26,13 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+@router.get("/activities_by_city", response_model=List[ActivityOut])
+def get_activities_by_city(city_id: int, db: Session = Depends(get_db)):
+    try:
+        return activity_service.get_activities_by_city(db=db, city_id=city_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.get("/activities/", response_model=List[ActivityOut])
 def get_all_activities(filters: ActivityFilters = Depends(), db: Session = Depends(get_db)):

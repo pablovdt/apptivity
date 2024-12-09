@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, Integer
 from api.services.category_service import category_service
 from models import Category, Organizer
 from models.user import User
@@ -9,6 +9,7 @@ from models.activity import Activity
 from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn
 from datetime import datetime
 from models.user_organizer import user_organizer
+from sqlalchemy import func
 
 
 class UserRepo:
@@ -142,6 +143,15 @@ class UserRepo:
             .filter(user_activity.c.user_id == user_id)
 
         return query.all()
+
+    @staticmethod
+    def get_assistances(db: Session, user_id: int):
+
+        total_assistance = db.query(func.sum(user_activity.c.assistance.cast(Integer)).label('total_assistance')) \
+            .filter(user_activity.c.user_id == user_id) \
+            .scalar()
+
+        return total_assistance if total_assistance is not None else 0
 
 
 user_repo: UserRepo = UserRepo()

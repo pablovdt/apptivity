@@ -79,6 +79,9 @@ class ActivityService:
     def get_all_activities(self, db: Session, filters: ActivityFilters) -> list[Activity]:
         return self._repo.get_all_activities(db=db, filters=filters)
 
+    def get_activities_by_city(self, db: Session, city_id:int):
+        return self._repo.get_activities_by_city(db=db, city_id=city_id)
+
     def get_activities_by_month(self, db: Session, organizer_id: int, year: int) -> Dict[str, int]:
 
         activities_by_month = self._repo.get_activities_by_month(db, organizer_id, year)

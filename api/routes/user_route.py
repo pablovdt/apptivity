@@ -170,3 +170,10 @@ def validate_qr_and_location(validate_qr_and_location: ValidateQrLocation, db: S
         return user_service.validate_qr_and_location(db=db, validate_qr_and_location=validate_qr_and_location)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{user_id}/assistances", response_model=int)
+def get_assistances(user_id: int, db: Session = Depends(get_db)):
+    try:
+        return user_service.get_assistances(db=db, user_id=user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
