@@ -12,6 +12,7 @@ from datetime import datetime
 from models.user_activity import user_activity
 from sqlalchemy import update
 
+
 class ActivityService:
     _repo: ActivityRepo = activity_repo
     _user_service = user_service
@@ -44,7 +45,7 @@ class ActivityService:
                                                            organizer_city.latitude,
                                                            organizer_city.longitude)
 
-            print(f"distancia: {distance_between_user_and_activity}")
+
             # la actividad creada se le asigna a un usuario depende de:
             #   Si la categoria de la actividad es igual a una categoria del usuario y la distancia es menor
             #   O si estas suscrito
@@ -59,7 +60,8 @@ class ActivityService:
                         activity_id=activity.id,
                         assistance=None,
                         inserted=datetime.utcnow(),
-                        updated=datetime.utcnow()
+                        updated=datetime.utcnow(),
+                        updated_confirmed=None
                     )
                 )
 
@@ -96,7 +98,6 @@ class ActivityService:
 
         return result
 
-
     def update_activity(self, db: Session, activity_id: int, activity_update: ActivityUpdate) -> Activity:
         activity = self.get_activity(db=db, activity_id=activity_id)
 
@@ -107,9 +108,14 @@ class ActivityService:
             setattr(activity, key, value)
             activity = self._repo.update_activity(db=db, activity=activity)
 
+
+        # Para notificar a un usuario de una actividad actualizada, debe marcar el 'quizás asistiré'
         db.execute(
             update(user_activity)
-            .where(user_activity.c.activity_id == activity_id)
+            .where(
+                (user_activity.c.activity_id == activity_id) &
+                (user_activity.c.possible_assistance == True)
+            )
             .values(updated_confirmed=False, updated=datetime.utcnow())
         )
 
