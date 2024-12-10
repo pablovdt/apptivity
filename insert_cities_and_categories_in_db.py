@@ -1,14 +1,13 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
-from sqlalchemy.orm import declarative_base, Session
-from dotenv import load_dotenv
-import os
+from api.services.city_service import city_service
 from api.services.category_service import category_service
-from models import City, Place
 from schemas.category_schema import CategoryCreate
+from schemas.city_schema import CityCreate
+from sqlalchemy.orm import Session
+from database import SessionLocal
+from models.organizer import Organizer
+from models.user_organizer import user_organizer
+from models.level import Level
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 correct_cities = {'Ábalos': {'code': 26339, 'lat': 42.5663460958579, 'long': -2.7034943374},
                   'Agoncillo': {'code': 26160, 'lat': 42.4362228354874, 'long': -2.2788383532},
@@ -185,62 +184,105 @@ correct_cities = {'Ábalos': {'code': 26339, 'lat': 42.5663460958579, 'long': -2
                   'Zarzosa': {'code': 26586, 'lat': 42.1789994353009, 'long': -2.357815936},
                   'Zorraquín': {'code': 26288, 'lat': 0, 'long': 0}}
 
-engine = create_engine(DATABASE_URL)
-Base = declarative_base()
+categories = [
+    {"name": "Vino"},
+    {"name": "Deporte"},
+    {"name": "Coche"},
+    {"name": "Moto"},
+    {"name": "Paseo"},
+    {"name": "Senderismo"},
+    {"name": "Ciclismo"},
+    {"name": "Pesca"},
+    {"name": "Caza"},
+    {"name": "Aventura"},
+    {"name": "Agroturismo"},
+    {"name": "Equitación"},
+    {"name": "Observación de aves"},
+    {"name": "Camping"},
+    {"name": "Escalada"},
+    {"name": "Navegación"},
+    {"name": "Fotografía rural"},
+    {"name": "Relax"},
+    {"name": "Trekking"},
+    {"name": "Gastronomía local"},
+    {"name": "Recolección de setas"},
+    {"name": "Arte y cultura local"},
+    {"name": "Vía ferrata"},
+    {"name": "Rutas en 4x4"},
+    {"name": "Turismo rural"},
+    {"name": "Caballos"},
+    {"name": "Conducción en la naturaleza"},
+    {"name": "Talleres artesanales"},
+    {"name": "Rutas gastronómicas"},
+    {"name": "Termalismo"},
+    {"name": "Relax en la naturaleza"},
+    {"name": "Degustación de vinos"},
+    {"name": "Cata de aceites"},
+    {"name": "Talleres de cocina tradicional"},
+    {"name": "Mercados locales"},
+    {"name": "Fiestas populares"},
+    {"name": "Rutas de queso"},
+    {"name": "Recogida de frutas"},
+    {"name": "Catas de productos locales"},
+    {"name": "Visitas a bodegas"},
+    {"name": "Rutas de miel"},
+    {"name": "Jornadas de caza y pesca"},
+    {"name": "Festivales rurales"},
+    {"name": "Senderismo en la naturaleza"},
+    {"name": "Visita a granjas"},
+    {"name": "Arte rural"},
+    {"name": "Días de campo"},
+    {"name": "Excursiones en tractor"},
+    {"name": "Rutas en quad"},
+    {"name": "Paseos en carro"},
+    {"name": "Actividades en granja"},
+    {"name": "Fiestas de la cosecha"},
+    {"name": "Escapadas rurales"},
+    {"name": "Rutas en bici de montaña"},
+    {"name": "Convivencia con animales de granja"},
+    {"name": "Rutas por los campos"},
+    {"name": "Observación de estrellas"},
+    {"name": "Fiestas de tradiciones locales"},
+    {"name": "Jornadas de intercambio cultural"},
+    {"name": "Ruta de los embutidos"},
+    {"name": "Catas de cerveza artesanal"},
+    {"name": "Talleres de cerámica"},
+    {"name": "Recreación histórica"},
+    {"name": "Rutas por caminos rurales"},
+    {"name": "Vuelta en carreta tirada por caballos"},
+    {"name": "Visitas a museos rurales"},
+    {"name": "Talleres de cestería"},
+    {"name": "Escuelas de oficios tradicionales"},
+    {"name": "Rutas de pastores"},
+    {"name": "Rutas por viñedos"},
+    {"name": "Caminos del vino"},
+    {"name": "Convivencia en aldeas"}
+]
 
+db: Session = SessionLocal()
 
-def insert_cities_to_db(cities):
-    with Session(engine) as session:
-        try:
-            city_objects = [
-                City(
-                    cp=city_data['code'],
-                    name=city_name,
-                    latitude=city_data['lat'],
-                    longitude=city_data['long'],
-                    location_url=f"https://www.google.com/maps?q={city_data['lat']},{city_data['long']}"
-                )
-                for city_name, city_data in cities.items()
-            ]
+def insert_cities_in_db():
 
-            session.add_all(city_objects)
+    for city_name, city_info in correct_cities.items():
+        city_create = CityCreate(
+            name=city_name,
+            latitude=float(city_info['lat']),
+            longitude=float(city_info['long']),
+            location_url=f"https://www.google.com/maps?q={city_info['lat']},{city_info['long']}",
+            cp=str(city_info['code']),
+        )
 
-            session.commit()
-            print(f"Se han insertado {len(city_objects)} ciudades correctamente.")
-        except Exception as e:
-            session.rollback()
-            print(f"Error al insertar datos: {e}")
+        city_service.create_city(db=db, city_create=city_create)
 
+def insert_categories_in_db():
+    for category_info in categories:
 
-def insert_places_from_cities():
-    with Session(engine) as session:
-        try:
-            cities = session.query(City).all()
+        category_create = CategoryCreate(
+            name=category_info['name'],
+        )
 
-            place_objects = [
-                Place(
-                    name=f"Plaza",
-                    location_url=city.location_url,
-                    city_id=city.id
-                )
-                for city in cities
-            ]
+        category_service.create_category(db=db, category_create=category_create)
 
-            session.add_all(place_objects)
-
-            session.commit()
-            print(f"Se han insertado {len(place_objects)} lugares correctamente.")
-        except Exception as e:
-            session.rollback()
-            print(f"Error al insertar datos: {e}")
-
-
-
-
-if __name__ == "__main__":
-    # insert_cities_to_db(correct_cities)
-    # insert_places_from_cities()
-    insert_categories_to_db()
-
-
-
+if __name__ == '__main__':
+    insert_cities_in_db()
+    insert_categories_in_db()

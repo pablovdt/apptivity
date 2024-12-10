@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  apptivity:
+    image: apptivity_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_pablo@db:5432/apptivity
+      - DB_HOST=db
+    depends_on:
+      - db
+    entrypoint: /bin/bash -c "chmod +x /wait-for-db.sh && /wait-for-db.sh && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    networks:
+      - app_network
+    volumes:
+      - ./wait-for-db.sh:/wait-for-db.sh
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_pablo
+      - POSTGRES_DB=apptivity
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  db_data:
