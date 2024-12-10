@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, Integer
 from api.services.category_service import category_service
 from models import Category, Organizer
@@ -6,7 +6,8 @@ from models.user import User
 from typing import Optional
 from models.user_activity import user_activity
 from models.activity import Activity
-from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn
+from schemas.category_schema import CategoryOut
+from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn, UserOut
 from datetime import datetime
 from models.user_organizer import user_organizer
 from sqlalchemy import func
@@ -20,9 +21,40 @@ class UserRepo:
         db.refresh(user)
         return user
 
+    # @staticmethod
+    # def get_user(db: Session, user_id: int) -> Optional[User]:
+    #     return db.query(User).filter(User.id == user_id).first()
+
     @staticmethod
-    def get_user(db: Session, user_id: int) -> Optional[User]:
-        return db.query(User).filter(User.id == user_id).first()
+    def get_user(db: Session, user_id: int) -> UserOut:
+
+        user = (
+            db.query(User)
+            .options(joinedload(User.level), joinedload(User.categories))
+            .filter(User.id == user_id)
+            .one_or_none()
+        )
+
+        if not user:
+            raise ValueError(f"Usuario con ID {user_id} no encontrado")
+
+        categories_out = [
+            CategoryOut(id=category.id, name=category.name)
+            for category in user.categories
+        ]
+
+        return UserOut(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            city_id=user.city_id,
+            settings=user.settings,
+            notification_distance=user.notification_distance,
+            categories=categories_out,
+            points=user.points,
+            level_id=user.level_id,
+            level_name=user.level.name
+        )
 
     @staticmethod
     def get_all_users(db: Session, filters: dict = None) -> list[User]:
@@ -83,8 +115,34 @@ class UserRepo:
             return None
 
     @staticmethod
-    def get_user_by_email(db: Session, email: str) -> User:
-        return db.query(User).filter(User.email == email).first()
+    def get_user_by_email(db: Session, email: str) -> UserOut:
+        user = (
+            db.query(User)
+            .options(joinedload(User.level), joinedload(User.categories))
+            .filter(User.email == email)
+            .one_or_none()
+        )
+
+        if not user:
+            raise ValueError(f"Usuario con email {email} no encontrado")
+
+        categories_out = [
+            CategoryOut(id=category.id, name=category.name)
+            for category in user.categories
+        ]
+
+        return UserOut(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            city_id=user.city_id,
+            settings=user.settings,
+            notification_distance=user.notification_distance,
+            categories=categories_out,
+            points=user.points,
+            level_id=user.level_id,
+            level_name=user.level.name
+        )
 
     @staticmethod
     def get_user_activities(db: Session, user_id: int, filters: UserActivityFilters):

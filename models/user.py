@@ -15,9 +15,13 @@ class User(Base):
     city_id = Column(Integer, ForeignKey('city.id'))
     settings = Column(JSONB)
     notification_distance = Column(Integer, nullable=True)
+    points = Column(Integer, nullable=False)
+    level_id = Column(Integer, ForeignKey('level.id'), nullable=False)
+    level = relationship('Level', back_populates='users')
 
     categories = relationship('Category', secondary='user_category', back_populates='users')
 
     activities = relationship('Activity', secondary='user_activity', back_populates='users')
 
     organizers = relationship('Organizer', secondary='user_organizer', back_populates='users')
+

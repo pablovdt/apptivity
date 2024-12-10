@@ -31,6 +31,9 @@ class UserUpdate(BaseModel):
 class UserOut(UserBase):
     id: int
     categories: List[CategoryOut]
+    points: int
+    level_id: int
+    level_name: str
 
     class Config:
         orm_mode = True

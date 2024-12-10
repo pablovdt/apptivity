@@ -4,9 +4,11 @@ import re
 from api.repositories.organizer_repo import OrganizerRepo
 from api.services.place_service import place_service
 from models import Activity, Organizer
+from models.level import Level
 from models.user import User
 from schemas.activity_schema import ActivityForUserOut, ActivityFilters
-from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn, ValidateQrLocation
+from schemas.user_schema import UserCreate, UserUpdate, UserActivityFilters, UserMoreActivitiesIn, ValidateQrLocation, \
+    UserOut
 from api.repositories.user_repo import user_repo, UserRepo
 from api.services.category_service import category_service
 from sqlalchemy import update
@@ -32,7 +34,9 @@ class UserService:
             password=user_create.password,
             city_id=user_create.city_id,
             notification_distance=user_create.notification_distance,
-            settings=user_create.settings
+            settings=user_create.settings,
+            points=0,
+            level_id=1
         )
         category_ids = []
         if user_create.category_ids:
@@ -139,7 +143,7 @@ class UserService:
         db.commit()
         db.refresh(user)
 
-    def get_user(self, db: Session, user_id: int) -> User:
+    def get_user(self, db: Session, user_id: int) -> UserOut:
         user = self._repo.get_user(db=db, user_id=user_id)
         if user:
             return user
@@ -233,12 +237,12 @@ class UserService:
         else:
             raise ValueError("No se encuentra un organizador con este email")
 
-    def get_user_by_email(self, db: Session, email: str) -> User:
+    def get_user_by_email(self, db: Session, email: str) -> UserOut:
         user = self._repo.get_user_by_email(db=db, email=email)
         if user:
             return user
         else:
-            raise ValueError("No se encuentra un organizador cone este email")
+            raise ValueError("No se encuentra un usuario cone este email")
 
     # def get_user_activities(self, db: Session, user_id: int) -> list[Activity]:
     #
@@ -376,7 +380,6 @@ class UserService:
                 )
                 db.commit()
 
-
     def validate_qr_and_location(self, db: Session, validate_qr_and_location: ValidateQrLocation) -> bool:
         from api.services.activity_service import activity_service
         self._activity_service = activity_service
@@ -393,6 +396,9 @@ class UserService:
         else:
             return False
 
+
+        user: User = self.get_user(db=db, user_id=validate_qr_and_location.user_id)
+
         # comprobacion de la distancia entre el usuario escaneando el qr y la geolocalizacion de la actividad
 
         distance = haversine(lat1=validate_qr_and_location.latitude,
@@ -400,15 +406,32 @@ class UserService:
                              lat2=place_latitude,
                              lon2=place_longitude
                              )
-        # 100 m
-        if distance <= 0.1:
-            self.update_assistance(db=db, user_id=validate_qr_and_location.user_id, activity_id=activity.id,
+
+        if distance <= 0.1:  # 100 m
+            self.update_assistance(db=db, user_id=user.id, activity_id=activity.id,
                                    assistance=True)
+
+            # logica de niveles
+            user.points += 1
+
+            new_level = (
+                db.query(Level)
+                .filter(Level.range_min <= user.points, Level.range_max >= user.points)
+                .one_or_none()
+            )
+
+            if new_level and user.level_id != new_level.id:
+                user.level_id = new_level.id
+
+            db.commit()
+            db.refresh(user)
+
             return True
         else:
             return False
 
     def get_assistances(self, db: Session, user_id: int):
         return self._repo.get_assistances(db=db, user_id=user_id)
+
 
 user_service: UserService = UserService()
