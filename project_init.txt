@@ -146,3 +146,24 @@ pip install pydantic[email]
 
 pip install passlib[bcrypt] python-dotenv
 
+
+
+
+
+
+docker
+
+
+
+
+ls -l ./database_procedures.sql
+
+sudo docker cp ./database_procedures.sql apptivity-db-1:/tmp/database_procedures.sql
+
+sudo docker exec -it apptivity-db-1 ls /tmp
+
+sudo docker exec -it apptivity-db-1 psql -U postgres -d apptivity -c "\i /tmp/database_procedures.sql"
+
+
+sudo docker exec -it apptivity-apptivity-1 /bin/bash
+python3 insert_cities_and_categories_in_db.py

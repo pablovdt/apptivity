@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, Integer
+from sqlalchemy import or_, Integer, select
 from api.services.category_service import category_service
 from models import Category, Organizer
 from models.user import User
@@ -11,7 +11,7 @@ from schemas.user_schema import UserActivityFilters, UserMoreActivitiesIn, UserO
 from datetime import datetime
 from models.user_organizer import user_organizer
 from sqlalchemy import func
-
+import random
 
 class UserRepo:
     @staticmethod
@@ -26,7 +26,7 @@ class UserRepo:
     #     return db.query(User).filter(User.id == user_id).first()
 
     @staticmethod
-    def get_user(db: Session, user_id: int) -> UserOut:
+    def get_user(db: Session, user_id: int) -> User:
 
         user = (
             db.query(User)
@@ -42,19 +42,19 @@ class UserRepo:
             CategoryOut(id=category.id, name=category.name)
             for category in user.categories
         ]
-
-        return UserOut(
-            id=user.id,
-            name=user.name,
-            email=user.email,
-            city_id=user.city_id,
-            settings=user.settings,
-            notification_distance=user.notification_distance,
-            categories=categories_out,
-            points=user.points,
-            level_id=user.level_id,
-            level_name=user.level.name
-        )
+        return user
+        # return UserOut(
+        #     id=user.id,
+        #     name=user.name,
+        #     email=user.email,
+        #     city_id=user.city_id,
+        #     settings=user.settings,
+        #     notification_distance=user.notification_distance,
+        #     categories=categories_out,
+        #     points=user.points,
+        #     level_id=user.level_id,
+        #     level_name=user.level.name
+        # )
 
     @staticmethod
     def get_all_users(db: Session, filters: dict = None) -> list[User]:
@@ -130,19 +130,19 @@ class UserRepo:
             CategoryOut(id=category.id, name=category.name)
             for category in user.categories
         ]
-
-        return UserOut(
-            id=user.id,
-            name=user.name,
-            email=user.email,
-            city_id=user.city_id,
-            settings=user.settings,
-            notification_distance=user.notification_distance,
-            categories=categories_out,
-            points=user.points,
-            level_id=user.level_id,
-            level_name=user.level.name
-        )
+        return user
+        # return UserOut(
+        #     id=user.id,
+        #     name=user.name,
+        #     email=user.email,
+        #     city_id=user.city_id,
+        #     settings=user.settings,
+        #     notification_distance=user.notification_distance,
+        #     categories=categories_out,
+        #     points=user.points,
+        #     level_id=user.level_id,
+        #     level_name=user.level.name
+        # )
 
     @staticmethod
     def get_user_activities(db: Session, user_id: int, filters: UserActivityFilters):
@@ -178,19 +178,23 @@ class UserRepo:
 
     @staticmethod
     def get_user_more_activities(db: Session, user_more_activities: UserMoreActivitiesIn):
-        # actividades existentes del usuario
+
+        # Actividades del usuario
         user_activities_subquery = (
-            db.query(user_activity.c.activity_id)
-            .filter(user_activity.c.user_id == user_more_activities.user_id)
-            .subquery()
+            select(user_activity.c.activity_id)
+            .where(user_activity.c.user_id == user_more_activities.user_id)
         )
-        #  actividades por categoría, no asociadas y con fecha superior a hoy
+
+
         query = (
             db.query(Activity)
-            .filter(Activity.category_id.in_(user_more_activities.categories_ids))
             .filter(~Activity.id.in_(user_activities_subquery))
-            .filter(Activity.date > datetime.utcnow())
+            .filter(Activity.date > datetime.now())
+            .order_by(func.random())
+            .limit(20)
         )
+
+        # Ejecutar y devolver las actividades
         return query.all()
 
     @staticmethod

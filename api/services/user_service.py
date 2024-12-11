@@ -39,6 +39,7 @@ class UserService:
             level_id=1
         )
         category_ids = []
+
         if user_create.category_ids:
             categories = []
 
@@ -103,7 +104,8 @@ class UserService:
                 activity_id=activity_id,
                 assistance=None,
                 inserted=datetime.utcnow(),
-                updated=datetime.utcnow()
+                updated=datetime.utcnow(),
+                updated_confirmed=True
             )
         )
 
@@ -143,7 +145,7 @@ class UserService:
         db.commit()
         db.refresh(user)
 
-    def get_user(self, db: Session, user_id: int) -> UserOut:
+    def get_user(self, db: Session, user_id: int) -> User:
         user = self._repo.get_user(db=db, user_id=user_id)
         if user:
             return user
@@ -318,7 +320,8 @@ class UserService:
                 image_path=activity.image_path,
                 category_id=activity.category_id,
                 cancelled=activity.cancelled,
-                assistance=None
+                assistance=None,
+                possible_assistance=None
             )
 
             activities_list.append(activity_out)

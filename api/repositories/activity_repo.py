@@ -30,8 +30,10 @@ class ActivityRepo:
         if filters.place_id:
             query = query.filter(Activity.place_id == filters.place_id)
 
+
+        # todo, change filter name to number_of_possible_assistances
         if filters.order_by_assistance:
-            query = query.order_by(Activity.number_of_assistances.desc())
+            query = query.order_by(Activity.number_of_possible_assistances.desc())
 
         if filters.is_date_order_asc:
             query = query.order_by(Activity.date.asc())

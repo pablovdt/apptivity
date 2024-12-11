@@ -1,8 +1,10 @@
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
 from pydantic import BaseModel
 from datetime import datetime
 
+from schemas.activity_schema import ActivityForUserOut
 from schemas.category_schema import CategoryOut
+from schemas.level_schema import LevelOut
 
 
 class UserBase(BaseModel):
@@ -31,9 +33,10 @@ class UserUpdate(BaseModel):
 class UserOut(UserBase):
     id: int
     categories: List[CategoryOut]
-    points: int
-    level_id: int
-    level_name: str
+    level: Union[LevelOut, None] = None
+    points: int = 0
+    # level_id: int
+    # level_name: str
 
     class Config:
         orm_mode = True

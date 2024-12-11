@@ -108,7 +108,7 @@ def get_user_activities(user_id: int, filters: UserActivityFilters = Depends(), 
 @router.get("/more_activities", response_model=List[ActivityForUserOut])
 def get_user_more_activities(
         user_id: int,
-        categories_ids: List[int] = Query(...),
+        categories_ids: List[int] = Query(default=[]),
         db: Session = Depends(get_db)
 ):
     try:
