@@ -7,5 +7,8 @@ class LevelBase(BaseModel):
     range_min: int
     range_max: int
 
+class LevelCreate(LevelBase):
+    pass
+
 class LevelOut(LevelBase):
     id: int

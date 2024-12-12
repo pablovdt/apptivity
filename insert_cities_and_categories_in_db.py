@@ -1,5 +1,6 @@
 from api.services.city_service import city_service
 from api.services.category_service import category_service
+from api.services.level_service import level_service
 from schemas.category_schema import CategoryCreate
 from schemas.city_schema import CityCreate
 from sqlalchemy.orm import Session
@@ -7,7 +8,7 @@ from database import SessionLocal
 from models.organizer import Organizer
 from models.user_organizer import user_organizer
 from models.level import Level
-
+from schemas.level_schema import LevelCreate
 
 correct_cities = {'Ábalos': {'code': 26339, 'lat': 42.5663460958579, 'long': -2.7034943374},
                   'Agoncillo': {'code': 26160, 'lat': 42.4362228354874, 'long': -2.2788383532},
@@ -259,6 +260,21 @@ categories = [
     {"name": "Convivencia en aldeas"}
 ]
 
+levels = [
+    {"name": "Semilla", "range_min": 0, "range_max": 20},
+    {"name": "Brote Verde", "range_min": 21, "range_max": 40},
+    {"name": "Planta Joven", "range_min": 41, "range_max": 60},
+    {"name": "Campo en Flor", "range_min": 61, "range_max": 80},
+    {"name": "Recolector/a", "range_min": 81, "range_max": 100},
+    {"name": "Cultivador/a", "range_min": 101, "range_max": 120},
+    {"name": "Granjero/a", "range_min": 121, "range_max": 140},
+    {"name": "Capataz de Campos", "range_min": 141, "range_max": 160},
+    {"name": "Terrateniente", "range_min": 161, "range_max": 180},
+    {"name": "Hacendado/a", "range_min": 181, "range_max": 200},
+    {"name": "Señor/a de la Naturaleza", "range_min": 201, "range_max": 500}
+]
+
+
 db: Session = SessionLocal()
 
 def insert_cities_in_db():
@@ -284,5 +300,12 @@ def insert_categories_in_db():
         category_service.create_category(db=db, category_create=category_create)
 
 if __name__ == '__main__':
+
     insert_cities_in_db()
     insert_categories_in_db()
+
+
+    levels_instances = [LevelCreate(**level) for level in levels]
+
+    for level_instance in levels_instances:
+        level_service.create_level(db=db, level_create=level_instance)
