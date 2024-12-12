@@ -8,10 +8,11 @@ class CityService:
 
     def create_city(self, db: Session, city_create: CityCreate) -> City:
         city = City(
-            cp=city_create.cp,  # Suponiendo que 'cp' es proporcionado en la creación
+            cp=city_create.cp,
             name=city_create.name,
             latitude=city_create.latitude,
-            longitude=city_create.longitude
+            longitude=city_create.longitude,
+            location_url=city_create.location_url
         )
         return self._repo.save_city(db=db, city=city)
 
