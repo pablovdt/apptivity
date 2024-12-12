@@ -1,6 +1,8 @@
 from api.services.city_service import city_service
 from api.services.category_service import category_service
 from api.services.level_service import level_service
+from api.services.place_service import place_service
+from models import City
 from schemas.category_schema import CategoryCreate
 from schemas.city_schema import CityCreate
 from sqlalchemy.orm import Session
@@ -8,7 +10,9 @@ from database import SessionLocal
 from models.organizer import Organizer
 from models.user_organizer import user_organizer
 from models.level import Level
+from models.place import Place
 from schemas.level_schema import LevelCreate
+from schemas.place_schema import PlaceCreate
 
 correct_cities = {'Ábalos': {'code': 26339, 'lat': 42.5663460958579, 'long': -2.7034943374},
                   'Agoncillo': {'code': 26160, 'lat': 42.4362228354874, 'long': -2.2788383532},
@@ -274,11 +278,10 @@ levels = [
     {"name": "Señor/a de la Naturaleza", "range_min": 201, "range_max": 500}
 ]
 
-
 db: Session = SessionLocal()
 
-def insert_cities_in_db():
 
+def insert_cities_in_db():
     for city_name, city_info in correct_cities.items():
         city_create = CityCreate(
             name=city_name,
@@ -290,22 +293,32 @@ def insert_cities_in_db():
 
         city_service.create_city(db=db, city_create=city_create)
 
+
 def insert_categories_in_db():
     for category_info in categories:
-
         category_create = CategoryCreate(
             name=category_info['name'],
         )
 
         category_service.create_category(db=db, category_create=category_create)
 
-if __name__ == '__main__':
 
-    insert_cities_in_db()
-    insert_categories_in_db()
-
-
+def insert_levels_in_db():
     levels_instances = [LevelCreate(**level) for level in levels]
 
     for level_instance in levels_instances:
         level_service.create_level(db=db, level_create=level_instance)
+
+
+def insert_places_in_db():
+    cities: list[City] = city_service.get_all_cities(db=db)
+
+    for city in cities:
+        place = PlaceCreate(name="Plaza", city_id=city.id, location_url=city.location_url)
+        place_service.create_place(db=db, place_create=place)
+
+if __name__ == '__main__':
+    insert_cities_in_db()
+    insert_categories_in_db()
+    insert_levels_in_db()
+    insert_places_in_db()
