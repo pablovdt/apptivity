@@ -24,48 +24,58 @@ Sigue estos pasos para poner en marcha el proyecto.
 
 Clona el repositorio de GitHub en tu máquina local:
 
+```bash
 git clone https://github.com/pablovdt/apptivity.git
+```
 
 ### 2. Muevete al repositorio recien clonado
+```bash
 cd apptivity
+```
 
 ### 3. Construye el proyecto con Docker
+```bash
 sudo docker-compose --build
+```
 
 ## Procedimientos SQL e inserciones de datos mediante archivo Python
 
 ### 4. Verfica el archivo necesario para procedimientos y triggers en Base de datos
+```bash
 ls -l ./database_procedures.sql
+```
 
 ### 5. Copialo al contenedor
-
+```bash
 sudo docker cp ./database_procedures.sql db:/tmp/database_procedures.sql
+```
 
 ### 6. Inicia los contenedores (api y bd)
+```bash
 sudo docker-compose up -d
-
+```
 ### 7. Verifica que se ha copiado al contenedor
-
+```bash
 sudo docker exec -it db ls /tmp
-
+```
 
 ### 8. Ejecuta las sentencias SQL
-
+```bash
 sudo docker exec -it db psql -U postgres -d apptivity -c "\i /tmp/database_procedures.sql"
-
+```
 
 ### 9. Inserta datos en la bd (Municipios, categorias y niveles)
-
+```bash
 sudo docker exec -it apptivity /bin/bash
 python3 insert_cities_and_categories_in_db.py
-
+```
 ## Docker
 
-Si deseas detener los contenedores en ejecución, usa el siguiente comando:
-
+### Si deseas detener los contenedores en ejecución, usa el siguiente comando:
+```bash
 sudo docker stop apptivity db
-
-Para volver a ejecutar los contenedores en segundo plano, usa el siguiente comando:
-
+```
+### Para volver a ejecutar los contenedores en segundo plano, usa el siguiente comando:
+```bash
 sudo docker-compose up -d
-
+```
