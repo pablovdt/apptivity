@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   apptivity:
+    container_name: apptivity
     image: apptivity_api
     build:
       context: .
@@ -20,6 +21,7 @@ services:
       - ./wait-for-db.sh:/wait-for-db.sh
 
   db:
+    container_name: db
     image: postgres:latest
     environment:
       - POSTGRES_USER=postgres
