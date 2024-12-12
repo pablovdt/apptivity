@@ -14,6 +14,7 @@ from api.services.category_service import category_service
 from sqlalchemy import update
 from models.user_activity import user_activity
 from api.services.organizer_service import organizer_service
+from api.services.level_service import level_service
 from api.services.city_service import city_service
 from core.haversine import haversine
 from models.user_organizer import user_organizer
@@ -26,8 +27,12 @@ class UserService:
     _organizer_service = organizer_service
     _city_service = city_service
     _place_service = place_service
+    _level_service = level_service
 
     def create_user(self, db: Session, user_create: UserCreate) -> User:
+
+        level_id: int = self._level_service.get_level_id(db=db, level_name="Semilla")
+
         user = User(
             name=user_create.name,
             email=user_create.email,
@@ -36,7 +41,7 @@ class UserService:
             notification_distance=user_create.notification_distance,
             settings=user_create.settings,
             points=0,
-            level_id=1
+            level_id=level_id
         )
         category_ids = []
 

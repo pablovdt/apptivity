@@ -15,4 +15,6 @@ class LevelService:
         )
         return self._repo.save_level(db=db, level=level)
 
+    def get_level_id(self, db: Session, level_name: str):
+        return self._repo.get_level_id(db, level_name)
 level_service: LevelService = LevelService()
