@@ -67,8 +67,10 @@ sudo docker exec -it db psql -U postgres -d apptivity -c "\i /tmp/database_proce
 ### 9. Inserta datos en la bd (Municipios, categorias y niveles)
 ```bash
 sudo docker exec -it apptivity /bin/bash
-python3 insert_cities_and_categories_in_db.py
 ```
+```bash
+python3 insert_cities_and_categories_in_db.py
+````
 ## Docker
 
 ### Si deseas detener los contenedores en ejecución, usa el siguiente comando:
