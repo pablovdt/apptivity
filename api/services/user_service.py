@@ -88,7 +88,8 @@ class UserService:
                             activity_id=activity.id,
                             assistance=None,
                             inserted=datetime.utcnow(),
-                            updated=datetime.utcnow()
+                            updated=datetime.utcnow(),
+                            updated_confirmed=True
                         )
                     )
 
