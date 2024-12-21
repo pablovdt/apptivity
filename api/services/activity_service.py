@@ -27,7 +27,7 @@ class ActivityService:
             price=activity_create.price,
             organizer_id=activity_create.organizer_id,
             description=activity_create.description,
-            image_path=activity_create.image_path if activity_create.image_path else "images/logotipo_apptivity.png",
+            image_path=activity_create.image_path if activity_create.image_path else "images/APPTIVITY.png",
             category_id=activity_create.category_id,
             cancelled=activity_create.cancelled
         )
