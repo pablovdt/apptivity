@@ -45,7 +45,6 @@ class ActivityService:
                                                            organizer_city.latitude,
                                                            organizer_city.longitude)
 
-
             # la actividad creada se le asigna a un usuario depende de:
             #   Si la categoria de la actividad es igual a una categoria del usuario y la distancia es menor
             #   O si estas suscrito
@@ -79,7 +78,7 @@ class ActivityService:
     def get_all_activities(self, db: Session, filters: ActivityFilters) -> list[Activity]:
         return self._repo.get_all_activities(db=db, filters=filters)
 
-    def get_activities_by_city(self, db: Session, city_id:int):
+    def get_activities_by_city(self, db: Session, city_id: int):
         return self._repo.get_activities_by_city(db=db, city_id=city_id)
 
     def get_activities_by_month(self, db: Session, organizer_id: int, year: int) -> Dict[str, int]:
@@ -110,7 +109,6 @@ class ActivityService:
         for key, value in activity_update.dict(exclude_unset=True).items():
             setattr(activity, key, value)
             activity = self._repo.update_activity(db=db, activity=activity)
-
 
         # Para notificar a un usuario de una actividad actualizada, debe marcar el 'quizás asistiré'
         db.execute(
