@@ -35,7 +35,7 @@ cd apptivity
 
 ### 3. Construye el proyecto con Docker
 ```bash
-sudo docker-compose up--build
+sudo docker-compose up --build
 ```
 
 ## Procedimientos SQL e inserciones de datos mediante archivo Python
