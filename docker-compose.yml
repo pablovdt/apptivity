@@ -14,7 +14,9 @@ services:
       - DB_HOST=db
     depends_on:
       - db
-    entrypoint: /bin/bash -c "chmod +x /wait-for-db.sh && /wait-for-db.sh && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    # entrypoint: /bin/bash -c "chmod +x /wait-for-db.sh && /wait-for-db.sh && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    entrypoint: /bin/bash -c "chmod +x /wait-for-db.sh && /wait-for-db.sh && echo 'Ejecutando migraciones...' && alembic upgrade head && echo 'Migraciones completadas' && uvicorn main:app --host 0.0.0.0 --port 8000"
+
     networks:
       - app_network
     volumes:
