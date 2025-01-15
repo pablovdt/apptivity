@@ -18,8 +18,4 @@ RUN chown root:root /wait-for-db.sh
 
 EXPOSE 8000
 
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# adjust to deploy in productiojn server
-CMD /bin/bash -c "/wait-for-db.sh && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
-
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
