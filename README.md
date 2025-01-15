@@ -24,6 +24,9 @@ Sigue estos pasos para poner en marcha el proyecto.
 
 Clona el repositorio de GitHub en tu máquina local:
 
+Debes cambiarte a la rama 'docker', la rama main esta configurada para el despliegue
+en produccion usando railway server
+
 ```bash
 git clone https://github.com/pablovdt/apptivity.git
 ```
